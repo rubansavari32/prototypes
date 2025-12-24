@@ -1,0 +1,450 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>GGI / Stadium — Shuttle Finder (2 routes)</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#071223; --card:#071923; --muted:#9fb0c6; --accent:#10b98a; --white:#e9f2fb;
+}
+*{box-sizing:border-box;font-family:Inter,system-ui,Segoe UI,Roboto,Arial}
+body{margin:0;background:linear-gradient(180deg,#041122 0%, #061628 70%);color:var(--white);min-height:100vh;display:flex;align-items:flex-start;justify-content:center;padding:28px}
+.app{width:100%;max-width:980px}
+.header{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.card{background:linear-gradient(180deg,var(--card), #07111a);border-radius:12px;padding:18px;box-shadow:0 12px 40px rgba(0,0,0,0.45)}
+.controls{display:grid;grid-template-columns:1fr 1fr 220px;gap:12px;align-items:end}
+label{display:block;font-size:13px;color:var(--muted);margin-bottom:6px}
+select,input[type="time"]{width:100%;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:rgba(255,255,255,0.02);color:var(--white)}
+button{background:var(--accent);border:none;color:#012018;padding:10px 12px;border-radius:8px;cursor:pointer;font-weight:700}
+.routeVis{display:flex;gap:12px;align-items:center;margin-top:16px}
+.stopBox{flex:1;padding:12px;border-radius:10px;background:rgba(255,255,255,0.02);text-align:center}
+.stopName{font-weight:700}
+.stopTime{margin-top:6px;color:var(--muted)}
+.connector{flex:2;position:relative;height:64px;display:flex;align-items:center;justify-content:center}
+.dashed{position:absolute;left:6%;right:6%;height:2px;border-bottom:2px dotted rgba(255,255,255,0.06);top:50%}
+.busDot{position:absolute;top:50%;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:6px}
+.busIcon{width:38px;height:38px;border-radius:10px;background:linear-gradient(180deg,var(--accent), #06a67a);display:flex;align-items:center;justify-content:center;color:#012018;font-weight:800}
+.etaSmall{font-size:13px;color:var(--muted)}
+.upList{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;margin-top:12px}
+.upItem{padding:10px;border-radius:8px;background:rgba(255,255,255,0.02);display:flex;justify-content:space-between;align-items:center;font-weight:700}
+.status{margin-top:12px;color:var(--muted);font-size:14px}
+.footer{margin-top:14px;color:var(--muted);font-size:13px;text-align:center}
+.small{font-size:12px;color:var(--muted)}
+@media (max-width:900px){.controls{grid-template-columns:1fr 1fr 1fr}.routeVis{flex-direction:column}.connector{height:84px}}
+</style>
+</head>
+<body>
+  <div class="app">
+    <div class="header">
+      <div class="card" style="display:flex;gap:12px;align-items:center;padding:10px 14px">
+        <div style="font-weight:800;color:var(--accent)">🚌</div>
+        <div>
+          <div style="font-size:18px;font-weight:700">GGI & Stadium Shuttle — Quick Finder</div>
+          <div style="font-size:12px;color:var(--muted)">Two routes: Accommodation GGI (GAR) & Accommodation Stadium (STD). Pick route → stop → see next arrival + countdown.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="controls">
+        <div>
+          <label>Route</label>
+          <select id="routeSelect">
+            <option value="ggi">Accommodation GGI (GAR)</option>
+            <option value="std">Accommodation Stadium (STD)</option>
+          </select>
+        </div>
+
+        <div>
+          <label>Stop</label>
+          <select id="stopSelect"></select>
+        </div>
+
+        <div>
+          <label>Time (editable)</label>
+          <div style="display:flex;gap:8px">
+            <input id="timeInput" type="time" />
+            <button id="nowBtn">Now</button>
+          </div>
+          <div style="font-size:12px;color:var(--muted);margin-top:6px">Change time to test scenarios.</div>
+        </div>
+      </div>
+
+      <div style="margin-top:12px;display:flex;gap:10px;align-items:center">
+        <button id="findBtn">Find next bus</button>
+        <div class="status" id="status">Waiting</div>
+      </div>
+
+      <div class="routeVis" style="margin-top:18px">
+        <div class="stopBox">
+          <div class="stopName" id="leftStop">--</div>
+          <div class="stopTime" id="leftTime">--:--</div>
+        </div>
+
+        <div class="connector">
+          <div class="dashed"></div>
+          <div class="busDot" id="busDot" style="left:6%">
+            <div class="busIcon">🚌</div>
+            <div class="etaSmall" id="eta">--</div>
+          </div>
+        </div>
+
+        <div class="stopBox">
+          <div class="stopName" id="rightStop">--</div>
+          <div class="stopTime" id="rightTime">--:--</div>
+        </div>
+      </div>
+
+      <div style="margin-top:12px" class="card">
+        <div style="font-weight:800" id="nextSummary">--</div>
+        <div style="color:var(--muted);margin-top:6px" id="nextDetails">--</div>
+      </div>
+
+      <div id="upcomingArea" style="margin-top:12px">
+        <div style="font-size:13px;color:var(--muted)">Next few departures (at selected stop)</div>
+        <div class="upList" id="upList"></div>
+      </div>
+
+      <div class="footer">Times come from the official timetable columns. Intermediate stops are estimated by interpolation between timetable points.</div>
+    </div>
+  </div>
+
+<script>
+// ---------- Utility ----------
+const pad = n => String(n).padStart(2,'0');
+function parseHM(hm){ if(!hm || hm==='*') return null; const [h,m]=hm.split(':').map(Number); return h*60 + m; }
+function minsToHM(mins){ mins = ((mins % (24*60)) + 24*60) % (24*60); return pad(Math.floor(mins/60))+':'+pad(mins%60); }
+function nowMinutesFromInput(inputVal){
+  if(!inputVal){ const d=new Date(); return d.getHours()*60 + d.getMinutes() + d.getSeconds()/60; }
+  const [hh,mm] = inputVal.split(':').map(Number);
+  return hh*60 + mm;
+}
+
+// ---------- Timetable rows (from your updated table) ----------
+// Each row: [Al Nahda, Mamzar(outbound), GGI/STD, Mamzar(return), Al Nahda(return)]
+const rows = [
+ ["05:15","05:25","05:40","*","*"],
+ ["06:10","06:20","06:35","06:48","06:53"],
+ ["06:30","06:40","06:55","07:10","07:15"],
+ ["06:55","07:05","07:20","07:35","07:45"],
+ ["07:20","07:30","07:45","08:00","08:10"],
+ ["07:50","08:00","08:15","08:30","08:40"],
+ ["08:20","08:30","08:45","09:00","09:10"],
+ ["09:00","09:10","09:25","09:40","09:50"],
+ ["10:10","10:20","10:35","10:50","11:00"],
+ ["11:10","11:20","11:35","11:50","12:00"],
+ ["12:10","12:20","12:35","12:50","13:00"],
+ ["12:50","13:00","13:15","13:30","13:35"],
+ ["13:15","13:25","13:40","13:55","14:05"],
+ ["13:40","13:50","14:05","14:20","14:30"],
+ ["14:10","14:20","14:35","14:48","14:53"],
+ ["14:30","14:40","14:55","15:10","15:20"],
+ ["14:55","15:05","15:20","15:35","15:45"],
+ ["15:35","15:45","16:00","16:15","16:20"],
+ ["16:00","16:10","16:25","16:38","16:43"],
+ ["16:40","16:50","17:05","17:20","17:30"],
+ ["17:15","17:25","17:40","17:55","18:05"],
+ ["17:50","18:00","18:15","18:30","18:40"],
+ ["18:20","18:35","18:50","19:05","19:15"],
+ ["18:50","19:00","19:15","19:30","19:40"],
+ ["19:15","19:30","19:45","20:05","20:15"],
+ ["19:45","20:00","20:15","20:30","20:40"],
+ ["20:10","20:25","20:40","20:55","21:05"],
+ ["20:45","21:00","21:15","21:28","21:33"],
+ ["21:05","21:20","21:35","21:50","22:00"],
+ ["21:15","21:30","21:45","22:00","22:10"],
+ ["22:00","22:10","22:25","22:38","22:43"],
+ ["22:20","22:30","22:45","22:58","23:03"],
+ ["22:45","22:55","23:10","23:23","23:28"],
+ ["23:05","23:15","23:30","23:45","23:50"],
+ ["*","*","00:10","00:25","00:30"],
+ ["*","*","01:10","01:25","01:30"]
+];
+
+// Build route objects. GGI route uses GAR- R15, STD route uses STD - G15.
+// Note: stops list (including La Zona Residence) is mapped to timetable keypoints with interpolation.
+const routes = {
+  "ggi": {
+    id: "ggi",
+    name: "Accommodation GGI (GAR)",
+    stops: [
+      "Al Nahda",
+      "La Zona Residence (outbound)",
+      "Mamzar (outbound)",
+      "GAR - R15",
+      "La Zona Residence (return)",
+      "Mamzar (return)",
+      "Al Nahda (return)"
+    ],
+    // each trip: object with times for key columns index: 0 AlNahda,1 Mamzar-out,2 GGI,3 Mamzar-ret,4 AlNahda-ret
+    trips: rows.map(r => ({cols: r}))
+  },
+  "std": {
+    id: "std",
+    name: "Accommodation Stadium (STD)",
+    stops: [
+      "Al Nahda",
+      "La Zona Residence (outbound)",
+      "Mamzar (outbound)",
+      "STD - G15",
+      "La Zona Residence (return)",
+      "Mamzar (return)",
+      "Al Nahda (return)"
+    ],
+    trips: rows.map(r => ({cols: r}))
+  }
+};
+
+// Map stop index to a pair of timetable column indices for interpolation.
+// columns: 0=AlNahda(out), 1=Mamzar(out), 2=GGI/STD, 3=Mamzar(ret), 4=AlNahda(ret)
+// We map:
+// stop 0 -> col0
+// stop 1 (La Zona outbound) -> between col0 and col1
+// stop 2 -> col1
+// stop 3 -> col2
+// stop 4 (La Zona return) -> between col2 and col3
+// stop 5 -> col3
+// stop 6 -> col4
+const stopMapping = [
+  {type:'exact',col:0},
+  {type:'interp',colA:0,colB:1,ratio:0.5},
+  {type:'exact',col:1},
+  {type:'exact',col:2},
+  {type:'interp',colA:2,colB:3,ratio:0.5},
+  {type:'exact',col:3},
+  {type:'exact',col:4}
+];
+
+// ---------- DOM ----------
+const routeSelect = document.getElementById('routeSelect');
+const stopSelect = document.getElementById('stopSelect');
+const timeInput = document.getElementById('timeInput');
+const nowBtn = document.getElementById('nowBtn');
+const findBtn = document.getElementById('findBtn');
+const status = document.getElementById('status');
+const leftStop = document.getElementById('leftStop');
+const leftTime = document.getElementById('leftTime');
+const rightStop = document.getElementById('rightStop');
+const rightTime = document.getElementById('rightTime');
+const busDot = document.getElementById('busDot');
+const eta = document.getElementById('eta');
+const nextSummary = document.getElementById('nextSummary');
+const nextDetails = document.getElementById('nextDetails');
+const upList = document.getElementById('upList');
+
+function setNowInput(){
+  const d=new Date();
+  timeInput.value = pad(d.getHours())+':'+pad(d.getMinutes());
+}
+setNowInput();
+nowBtn.onclick = setNowInput;
+
+// populate stops when route changes
+function populateStops(){
+  const rkey = routeSelect.value;
+  const r = routes[rkey];
+  stopSelect.innerHTML = '';
+  r.stops.forEach((s,i)=>{
+    const opt = document.createElement('option');
+    opt.value = String(i);
+    opt.textContent = s;
+    stopSelect.appendChild(opt);
+  });
+}
+routeSelect.addEventListener('change', populateStops);
+populateStops();
+
+// Convert a trip + stopIndex to time-in-minutes (may interpolate)
+// Returns minutes-since-midnight or null for no-service
+function tripTimeForStop(trip, stopIndex){
+  const map = stopMapping[stopIndex];
+  if(!map) return null;
+  if(map.type === 'exact'){
+    const t = trip.cols[map.col];
+    return parseHM(t);
+  } else if(map.type === 'interp'){
+    const ta = trip.cols[map.colA];
+    const tb = trip.cols[map.colB];
+    const ma = parseHM(ta); const mb = parseHM(tb);
+    if(ma === null && mb === null) return null;
+    // if one side is null, return the other side (no interpolation possible)
+    if(ma === null) return mb;
+    if(mb === null) return ma;
+    // handle cases where mb < ma (overnight) by adding 24h to mb
+    let mbAdj = mb;
+    if(mbAdj < ma) mbAdj += 24*60;
+    const val = Math.round(ma + (mbAdj - ma) * map.ratio);
+    return val % (24*60);
+  }
+  return null;
+}
+
+// Build candidate arrivals at a stop: returns array of {tripIdx, departMinNormalized}
+function buildCandidatesForStop(routeKey, stopIndex, nowMin){
+  const r = routes[routeKey];
+  const cand = [];
+  for(let i=0;i<r.trips.length;i++){
+    const trip = r.trips[i];
+    const tmin = tripTimeForStop(trip, stopIndex);
+    if(tmin === null) continue;
+    let dep = tmin;
+    // if departure time earlier or equal to now, treat as next-day by adding 24*60
+    if(dep <= nowMin) dep += 24*60;
+    cand.push({tripIdx:i, depMin:dep});
+  }
+  cand.sort((a,b)=>a.depMin - b.depMin);
+  return cand;
+}
+
+// find next N arrivals
+function nextNForStop(routeKey, stopIndex, nowMin, n=8){
+  return buildCandidatesForStop(routeKey, stopIndex, nowMin).slice(0,n);
+}
+
+// Render helpers
+function showStatus(txt){ status.textContent = txt; }
+
+// bus position: show simple left/right: if selected stop is origin vs destination we just show dept/arr
+function renderBusDotRelative(positionPct, smallText){
+  busDot.style.left = (6 + (94-6)*positionPct) + '%';
+  eta.textContent = smallText;
+}
+
+// Main compute & render
+let countdownTimer = null;
+function computeAndRender(){
+  const routeKey = routeSelect.value;
+  const stopIndex = Number(stopSelect.value);
+  const nowMinInput = nowMinutesFromInput(timeInput.value);
+  const route = routes[routeKey];
+
+  // Next candidate at this stop
+  const candidates = buildCandidatesForStop(routeKey, stopIndex, nowMinInput);
+  if(candidates.length === 0){
+    showStatus('No services at this stop.');
+    leftStop.textContent = route.stops[stopIndex];
+    leftTime.textContent = '--:--';
+    nextSummary.textContent = 'No upcoming trips';
+    nextDetails.textContent = '';
+    upList.innerHTML = '<div style="color:var(--muted)">No upcoming</div>';
+    renderBusDotRelative(0, '--');
+    return;
+  }
+
+  const next = candidates[0];
+  const nextHM = minsToHM(next.depMin);
+  leftStop.textContent = route.stops[stopIndex];
+  leftTime.textContent = nextHM;
+
+  // Find corresponding trip object and derive context times (for mini-route viz)
+  const trip = route.trips[next.tripIdx];
+  // key points times normalized to possibly >1440 if next day
+  function norm(i){
+    const t = parseHM(trip.cols[i]);
+    if(t === null) return null;
+    let val = t;
+    if(val <= nowMinInput) val += 24*60; // shift to next day if needed
+    return val;
+  }
+  const A = norm(0); // Al Nahda out
+  const B = norm(1); // Mamzar out
+  const C = norm(2); // GGI/STD
+  const D = norm(3); // Mamzar ret
+  const E = norm(4); // Al Nahda ret
+
+  // Basic visualization: set rightStop to destination key for clarity
+  // For simplicity use the next stop in the route sequence (if exists)
+  rightStop.textContent = route.stops[Math.min(stopIndex+1, route.stops.length-1)];
+  rightTime.textContent = '--:--';
+
+  // Countdown with seconds until that stop
+  if(countdownTimer) clearInterval(countdownTimer);
+  function updateCountdown(){
+    // get "now" aligned with the editable input's hour/min but with actual seconds
+    const [ih,im] = (timeInput.value||'').split(':').map(x=>Number(x));
+    const base = new Date();
+    if(!isNaN(ih) && !isNaN(im)){
+      base.setHours(ih, im, 0, 0);
+    }
+    const now = base;
+    // target depart time as Date: derive from next.depMin relative to today's hh:mm
+    const target = new Date(base.getTime());
+    const targetHM = next.depMin % (24*60);
+    const th = Math.floor(targetHM/60);
+    const tm = targetHM % 60;
+    target.setHours(th, tm, 0, 0);
+    // if next.depMin >= 1440 then it's next day => add one day
+    if(next.depMin >= 24*60) target.setDate(target.getDate() + 1);
+
+    let diff = Math.max(0, Math.floor((target - now)/1000)); // seconds
+    const mm = Math.floor(diff/60);
+    const ss = diff % 60;
+    nextDetails.textContent = `Next at ${minsToHM(next.depMin)} — departs in ${mm}m ${pad(ss)}s`;
+    // also compute mini position between last known keypoint and next known keypoint to place busDot
+    // We'll find two keypoints that bracket our selected stop in the trip timeline
+    // Build timeline of (stopName, minute)
+    const timeline = [
+      {name:'Al Nahda', min:A},
+      {name:'Mamzar (out)', min:B},
+      {name:routeKey==='ggi' ? 'GAR - R15' : 'STD - G15', min:C},
+      {name:'Mamzar (ret)', min:D},
+      {name:'Al Nahda (ret)', min:E}
+    ].filter(x=>x.min!==null);
+    // Determine the stop's corresponding minute within same normalization
+    const stopMin = tripTimeForStop(trip, stopIndex);
+    let stopMinNorm = stopMin;
+    if(stopMinNorm !== null && stopMinNorm <= nowMinInput) stopMinNorm += 24*60;
+    // find bracket for the bus position relative to this stop: if now < stop time -> position before
+    const nowMinutes = nowMinutesFromInput(timeInput.value); // no seconds
+    // Determine fraction: if now < stop => between previous keypoint and stop (if exists)
+    let posFrac = 0;
+    if(nowMinutes < stopMinNorm){
+      // find previous keypoint in timeline before stopMinNorm
+      let prev = null;
+      for(let i=timeline.length-1;i>=0;i--){
+        if(timeline[i].min < stopMinNorm){ prev = timeline[i]; break; }
+      }
+      const nextPoint = {min: stopMinNorm};
+      if(prev){
+        const total = nextPoint.min - prev.min;
+        const passed = Math.max(0, nowMinutes - prev.min);
+        posFrac = passed / Math.max(1,total);
+      } else {
+        posFrac = 0;
+      }
+    } else {
+      // already passed stop -> show near 1
+      posFrac = 1;
+    }
+    renderBusDotRelative(posFrac, `${Math.max(0,mm)}m ${pad(ss)}s`);
+    // update upcoming list too
+    renderUpcoming(routeKey, stopIndex, nowMinutes);
+  }
+  updateCountdown();
+  countdownTimer = setInterval(updateCountdown, 1000);
+
+  // summary
+  nextSummary.textContent = `${route.name} — Next at ${minsToHM(next.depMin)} (stop: ${route.stops[stopIndex]})`;
+  showStatus(`Next arrival computed`);
+}
+
+// Upcoming list display
+function renderUpcoming(routeKey, stopIndex, nowMin){
+  const list = nextNForStop(routeKey, stopIndex, nowMin, 8);
+  if(list.length === 0){ upList.innerHTML = '<div style="color:var(--muted)">No upcoming</div>'; return; }
+  upList.innerHTML = list.map(it=>{
+    return `<div class="upItem"><div style="font-weight:700">${minsToHM(it.depMin)}</div><div style="font-size:12px;color:var(--muted)">trip #${it.tripIdx+1}</div></div>`;
+  }).join('');
+}
+
+// wire events
+findBtn.onclick = computeAndRender;
+document.addEventListener('keydown', e=>{ if(e.key==='Enter') computeAndRender(); });
+
+// initial
+computeAndRender();
+</script>
+</body>
+</html>

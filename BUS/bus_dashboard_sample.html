@@ -1,0 +1,428 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>GGI Shuttle — Next Bus Visual (animated)</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#071223; --card:#071523; --muted:#98a7bb; --accent:#10b98a; --glass:rgba(255,255,255,0.02);
+    --glass-2: rgba(255,255,255,0.03); --white: #e9f2fb;
+  }
+  *{box-sizing:border-box}
+  body{font-family:Inter,system-ui,Segoe UI,Roboto,Arial;margin:0;background:
+    radial-gradient(1200px 500px at 10% 5%, rgba(16,185,129,0.04), transparent 8%),
+    linear-gradient(180deg,#041122 0%, #061628 60%);
+    color:var(--white);min-height:100vh;display:flex;align-items:flex-start;
+    justify-content:center;padding:28px}
+  .app{width:100%;max-width:1040px}
+  header{display:flex;align-items:center;gap:12px;margin-bottom:18px}
+  h1{margin:0;font-size:20px}
+  .card{background:linear-gradient(180deg,var(--card), #05131a);border-radius:12px;padding:18px;box-shadow:0 10px 30px rgba(2,6,23,0.6);backdrop-filter:blur(6px)}
+  .grid{display:grid;grid-template-columns:1fr 340px;gap:18px}
+  label{display:block;font-size:13px;color:var(--muted);margin-bottom:8px}
+  select,input[type="time"]{width:100%;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:var(--glass);color:inherit}
+  .controls{display:grid;gap:12px}
+  .row{display:flex;gap:12px;align-items:center}
+  button{background:var(--accent);border:none;color:#012018;padding:10px 14px;border-radius:10px;cursor:pointer;font-weight:700}
+  .muted{color:var(--muted);font-size:13px}
+  .statusCard{padding:14px;border-radius:10px;background:linear-gradient(180deg, rgba(16,185,138,0.03), rgba(16,185,138,0.01));border:1px solid rgba(16,185,138,0.08)}
+  .controlsCard{padding:18px;border-radius:12px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01))}
+  .findRow{margin-top:6px;display:flex;gap:10px;align-items:center}
+  .upcomingArea{margin-top:16px;padding:14px;border-radius:10px;background:var(--glass-2);border:1px solid rgba(255,255,255,0.03)}
+  .routeVis{display:flex;align-items:center;gap:14px;padding:16px;background:linear-gradient(180deg, rgba(2,6,23,0.5), rgba(2,6,23,0.35));border-radius:10px}
+  .stopBox{flex:1;padding:12px;border-radius:10px;background:rgba(255,255,255,0.02);text-align:center}
+  .stopName{font-weight:700;font-size:16px}
+  .stopTime{margin-top:8px;color:var(--muted);font-weight:600}
+  .connector{flex:2;position:relative;height:64px;display:flex;align-items:center;justify-content:center}
+  .dottedLine{position:absolute;left:6%;right:6%;height:2px;border-bottom:2px dotted rgba(255,255,255,0.06);top:50%}
+  .busDot{position:absolute;top:50%;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:6px}
+  .busIcon{
+    width:36px;height:36px;border-radius:10px;background:linear-gradient(180deg,var(--accent),#06a67a);
+    display:flex;align-items:center;justify-content:center;color:#012018;font-weight:800;box-shadow:0 6px 18px rgba(7,88,64,0.25)
+  }
+  .etaSmall{font-size:13px;color:var(--muted)}
+  .upList{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+  .upItem{padding:8px;border-radius:8px;background:rgba(255,255,255,0.02);display:flex;justify-content:space-between;align-items:center;font-weight:600}
+  .dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,0.06);margin-right:8px}
+  .mini{font-size:13px;color:var(--muted)}
+  .footerNote{margin-top:10px;color:var(--muted);font-size:13px}
+  @media (max-width:980px){
+    .grid{grid-template-columns:1fr}
+    .connector{height:84px}
+  }
+</style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <div class="card" style="display:flex;align-items:center;gap:12px;padding:10px 14px">
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none"><path d="M3 13.5V9a6 6 0 016-6h6a6 6 0 016 6v4.5" stroke="#10b98a" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><rect x="3" y="13.5" width="18" height="6" rx="1.2" stroke="#10b98a" stroke-width="1.4"/></svg>
+        <div>
+          <h1>GGI Shuttle — Next Bus Visual</h1>
+          <div class="muted">Pick origin & destination — time auto-detected (editable)</div>
+        </div>
+      </div>
+    </header>
+
+    <div class="grid">
+      <div class="controlsCard card">
+        <div class="controls">
+          <div>
+            <label>Current location</label>
+            <select id="origin">
+              <option>Choose...</option>
+              <option>Al Nahda</option>
+              <option selected>Mamzar</option>
+              <option>GGI</option>
+            </select>
+          </div>
+
+          <div>
+            <label>Destination</label>
+            <select id="destination">
+              <option>Choose...</option>
+              <option>Al Nahda</option>
+              <option>Mamzar</option>
+              <option>GGI</option>
+            </select>
+          </div>
+
+          <div>
+            <label>Current time (editable)</label>
+            <div class="row">
+              <input id="timeInput" type="time" />
+              <button id="nowBtn" title="Use current system time">Use Now</button>
+            </div>
+            <div class="muted mini">You can edit time to test scenarios. Every 10s the animation updates using chosen time.</div>
+          </div>
+
+          <div class="findRow">
+            <button id="findBtn">Find next bus</button>
+            <div class="muted mini">or press Enter</div>
+          </div>
+
+          <!-- BELOW find button: the requested upcoming visual area -->
+          <div class="upcomingArea" id="visualArea" style="margin-top:14px;">
+            <div class="routeVis" id="routeVis">
+              <div class="stopBox">
+                <div class="stopName" id="leftStop">--</div>
+                <div class="stopTime" id="leftTime">--:--</div>
+                <div class="mini" id="leftLabel">departure</div>
+              </div>
+
+              <div class="connector">
+                <div class="dottedLine"></div>
+                <div class="busDot" id="busDot" style="left:6%">
+                  <div class="busIcon">🚌</div>
+                  <div class="etaSmall" id="busETA">--</div>
+                </div>
+              </div>
+
+              <div class="stopBox">
+                <div class="stopName" id="rightStop">--</div>
+                <div class="stopTime" id="rightTime">--:--</div>
+                <div class="mini" id="rightLabel">arrival</div>
+              </div>
+            </div>
+
+            <div id="upcomingList" style="margin-top:12px">
+              <div class="muted mini">Upcoming schedule (origin ⇢ destination)</div>
+              <div class="upList" id="upListGrid"></div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div>
+        <div class="card statusCard">
+          <div class="muted mini">Status</div>
+          <div id="status" style="margin-top:10px"><div class="mini">Waiting for input</div></div>
+
+          <div style="margin-top:12px;padding:12px;border-radius:10px;background:linear-gradient(180deg, rgba(16,185,138,0.03), rgba(16,185,138,0.01));border:1px solid rgba(16,185,138,0.08)">
+            <div class="muted mini">Next departure</div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px">
+              <div>
+                <div style="font-size:22px;font-weight:800" id="nextTime">--:--</div>
+                <div class="mini muted" id="nextFrom">--</div>
+              </div>
+              <div style="text-align:right">
+                <div class="mini muted">Time remaining</div>
+                <div style="font-size:22px;font-weight:800" id="minutesRemain">--</div>
+                <div class="mini muted">minutes</div>
+              </div>
+            </div>
+
+            <div style="margin-top:12px">
+              <div class="muted mini">Upcoming (next 8)</div>
+              <div id="upcomingShort" style="margin-top:8px"></div>
+            </div>
+          </div>
+
+          <div class="footerNote">Sample timetable embedded. I can replace it with your full parsed timetable.</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+<script>
+/* ---------- sample timetable (same compact sample) ---------- */
+const timetable = {
+  "Mamzar": {
+    outbound: ["05:25","06:25","07:05","07:30","08:15","08:45","09:25","10:35","11:35","12:35","13:15",
+               "19:30","20:00","20:25","21:00","21:20","21:30","22:10","22:30","22:55","23:15"],
+    return:   ["05:40","06:10","06:35","07:00","07:25","08:40","09:10","09:50","11:00","12:00","13:00","13:35",
+               "20:05","20:30","20:55","21:28","21:50","22:00","22:38","22:58","23:23","23:45"]
+  },
+  "Al Nahda": {
+    outbound: ["05:15","06:10","06:30","06:55","07:20","07:50","08:20","09:00","10:10","11:10","12:10","12:50","13:35",
+               "19:15","19:45","20:10","20:45","21:05","21:15","21:33","22:00","22:25","22:45","23:05","23:50","00:30"],
+    return:  ["05:50","06:20","06:45","07:10","07:35","08:40","09:25","09:50","11:20","12:00","13:00","13:35",
+               "20:15","20:40","21:05","21:33","22:00","22:10","22:43","23:03","23:28","23:50","00:30"]
+  },
+  "GGI": {
+    times: ["05:40","06:48","07:10","07:35","08:00","08:30","09:00","09:40","10:50","11:50","12:50","13:30",
+            "19:45","20:15","20:40","21:15","21:35","21:45","22:25","22:45","23:10","23:30","00:10","01:10"]
+  }
+};
+
+/* heuristics for travel durations (minutes) - adjust to your real parsed data later */
+const TRAVEL_MINUTES = {
+  "Mamzar->GGI": 15,
+  "Mamzar->Al Nahda": 5,
+  "GGI->Mamzar": 13,
+  "GGI->Al Nahda": 33,
+  "Al Nahda->Mamzar": 15,
+  "Al Nahda->GGI": 30
+};
+
+/* helpers */
+function parseHM(hm){
+  const [h,m] = hm.split(':').map(x=>parseInt(x,10));
+  return {h,m};
+}
+function makeDateFromHM(hm, baseDate=new Date()){
+  const {h,m} = parseHM(hm);
+  const d = new Date(baseDate.getFullYear(), baseDate.getMonth(), baseDate.getDate(), h, m, 0);
+  return normalizeScheduleDate(d, baseDate);
+}
+function normalizeScheduleDate(schedDate, nowDate){
+  // if schedule time is >12 hours behind, consider next day (handles midnight wrap)
+  if((schedDate - nowDate) < -12*3600*1000){
+    schedDate.setDate(schedDate.getDate() + 1);
+  }
+  return schedDate;
+}
+function minutesBetween(a,b){ return Math.round((b-a)/60000); }
+
+/* find next schedule list for origin->dest */
+function getScheduleList(origin, dest){
+  // choose right list from sample dataset
+  if(origin === "Mamzar" && dest === "GGI") return timetable.Mamzar.outbound;
+  if(origin === "Mamzar" && dest === "Al Nahda") return timetable.Mamzar.return;
+  if(origin === "Al Nahda" && dest === "Mamzar") return timetable["Al Nahda"].outbound;
+  if(origin === "Al Nahda" && dest === "GGI") return timetable["Al Nahda"].outbound;
+  if(origin === "GGI" && dest === "Mamzar") return timetable.GGI.times;
+  if(origin === "GGI" && dest === "Al Nahda") return timetable.GGI.times;
+  return [];
+}
+
+function estimateArrival(origin,dest, departDate, departStr){
+  // heuristic arrival time
+  let key = `${origin}->${dest}`;
+  let mins = TRAVEL_MINUTES[key] || 15;
+  // some origins share same departure list; refine if needed
+  const arr = new Date(departDate.getTime() + mins*60000);
+  return arr;
+}
+
+/* UI wiring & logic */
+const originEl = document.getElementById('origin');
+const destEl = document.getElementById('destination');
+const timeInput = document.getElementById('timeInput');
+const nowBtn = document.getElementById('nowBtn');
+const findBtn = document.getElementById('findBtn');
+
+const statusEl = document.getElementById('status');
+const nextTimeEl = document.getElementById('nextTime');
+const minutesRemainEl = document.getElementById('minutesRemain');
+const nextFromEl = document.getElementById('nextFrom');
+const upcomingShortEl = document.getElementById('upcomingShort');
+
+const leftStopEl = document.getElementById('leftStop');
+const leftTimeEl = document.getElementById('leftTime');
+const rightStopEl = document.getElementById('rightStop');
+const rightTimeEl = document.getElementById('rightTime');
+const busDot = document.getElementById('busDot');
+const busETA = document.getElementById('busETA');
+const upListGrid = document.getElementById('upListGrid');
+
+function setNowToInput(){
+  const now = new Date();
+  timeInput.value = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+}
+
+nowBtn.onclick = () => setNowToInput();
+setNowToInput();
+
+function showStatus(txt){ statusEl.innerHTML = `<div class="mini">${txt}</div>`; }
+
+function computeAndRender(){
+  const origin = originEl.value;
+  const dest = destEl.value;
+  const timeVal = timeInput.value;
+  if(!origin || origin === "Choose..." || !dest || dest === "Choose..."){
+    showStatus("Select origin and destination");
+    return;
+  }
+  if(origin === dest){
+    showStatus("Origin and destination are the same.");
+    return;
+  }
+  if(!timeVal){
+    showStatus("Set the time (Use Now)");
+    return;
+  }
+  // create now date based on input
+  const nowParts = timeVal.split(':').map(x=>parseInt(x,10));
+  const now = new Date();
+  now.setHours(nowParts[0], nowParts[1], 0, 0);
+
+  // get schedule list and convert to dates
+  const schedList = getScheduleList(origin,dest);
+  const schedDates = schedList.map(s => ({str:s, date: makeDateFromHM(s, now)})).sort((a,b)=>a.date - b.date);
+
+  // find next departure after now
+  const next = schedDates.find(s => s.date > now);
+  if(!next){
+    showStatus("No more buses today");
+    nextTimeEl.textContent = "--:--";
+    minutesRemainEl.textContent = "--";
+    nextFromEl.textContent = `${origin} → ${dest}`;
+    renderUpcoming(schedDates, now);
+    renderRouteVisual(null, origin, dest, now);
+    return;
+  }
+  const minutes = Math.ceil((next.date - now)/60000);
+  nextTimeEl.textContent = next.str;
+  minutesRemainEl.textContent = String(minutes);
+  nextFromEl.textContent = `${origin} → ${dest}`;
+  showStatus(`${origin} → ${dest} — next departure found`);
+  // create arrival estimate
+  const arrival = estimateArrival(origin,dest,next.date,next.str);
+  // render upcoming list (short)
+  const nextFew = schedDates.filter(s => s.date >= now).slice(0,8);
+  const shortHtml = nextFew.map(s=>`<div style="display:inline-block;margin-right:8px;padding:6px 8px;border-radius:8px;background:rgba(255,255,255,0.02);font-weight:700">${s.str}</div>`).join('');
+  upcomingShortEl.innerHTML = shortHtml;
+  renderUpcoming(schedDates, now);
+  renderRouteVisual({depart:next, arrival}, origin, dest, now);
+}
+
+/* render upcoming grid with left/right times for each upcoming departure */
+function renderUpcoming(schedDates, now){
+  upListGrid.innerHTML = '';
+  // pick next 6 departures
+  const nextOnes = schedDates.filter(s => s.date >= now).slice(0,6);
+  if(nextOnes.length === 0){
+    upListGrid.innerHTML = '<div class="mini muted">No upcoming departures</div>';
+    return;
+  }
+  nextOnes.forEach(s => {
+    // arrival estimate using current origin/dest
+    const origin = originEl.value, dest = destEl.value;
+    const arrival = estimateArrival(origin,dest,s.date,s.str);
+    const left = `<div style="display:flex;align-items:center"><div class="dot"></div><div style="font-weight:700">${s.str}</div></div>`;
+    const right = `<div style="text-align:right"><div style="font-weight:700">${ formatTime(arrival) }</div><div class="mini muted">arr</div></div>`;
+    const wrapper = document.createElement('div');
+    wrapper.className = 'upItem';
+    wrapper.innerHTML = `${left}${right}`;
+    upListGrid.appendChild(wrapper);
+  });
+}
+
+function formatTime(d){
+  return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+}
+
+/* render the main route visualization and animate the bus along the dotted line */
+let animInterval = null;
+function renderRouteVisual(nextObj, origin, dest, now){
+  // set labels
+  leftStopEl.textContent = origin;
+  rightStopEl.textContent = dest;
+  if(!nextObj){
+    leftTimeEl.textContent = "--:--";
+    rightTimeEl.textContent = "--:--";
+    busDot.style.left = "6%";
+    busETA.textContent = "";
+    return;
+  }
+  const depart = nextObj.depart; // {str, date}
+  const arrival = nextObj.arrival; // Date
+  leftTimeEl.textContent = depart.str;
+  rightTimeEl.textContent = formatTime(arrival);
+  busETA.textContent = `arr ${formatTime(arrival)}`;
+
+  // compute progress and animate: progress = (now - depart) / (arrival - depart)
+  function updatePosition(){
+    const timeVal = timeInput.value;
+    const nowParts = timeVal.split(':').map(x=>parseInt(x,10));
+    const curr = new Date(); curr.setHours(nowParts[0], nowParts[1], 0, 0);
+    let progress;
+    if(curr < depart.date){
+      progress = 0;
+    } else if(curr >= arrival){
+      progress = 1;
+    } else {
+      const total = arrival - depart.date;
+      const passed = curr - depart.date;
+      progress = passed / total;
+      if(progress < 0) progress = 0;
+      if(progress > 1) progress = 1;
+    }
+    // map progress 0..1 to left..right % (6%..94%)
+    const leftBound = 6; const rightBound = 94;
+    const pos = leftBound + (rightBound - leftBound) * progress;
+    busDot.style.left = pos + '%';
+
+    // change icon/text based on state
+    const minutesToDepart = Math.ceil((depart.date - curr)/60000);
+    if(minutesToDepart > 0){
+      // not departed yet - bus at origin
+      busETA.textContent = `dep ${depart.str}`;
+      busDot.style.opacity = 0.96;
+      busDot.style.transform = 'translate(-50%,-50%) scale(1)';
+    } else if(curr >= arrival){
+      busETA.textContent = `arr ${formatTime(arrival)}`;
+      busDot.style.opacity = 0.6;
+      busDot.style.transform = 'translate(-50%,-50%) scale(.95)';
+    } else {
+      const minsLeft = Math.ceil((arrival - curr)/60000);
+      busETA.textContent = `${minsLeft}m to arr`;
+      busDot.style.opacity = 1;
+      // subtle animation along path
+      busDot.style.transform = 'translate(-50%,-50%) scale(1)';
+    }
+  }
+
+  // run update now and start interval
+  updatePosition();
+  if(animInterval) clearInterval(animInterval);
+  animInterval = setInterval(updatePosition, 10*1000); // every 10s
+}
+
+/* wire events */
+findBtn.onclick = computeAndRender;
+document.addEventListener('keydown', (e)=>{ if(e.key === 'Enter') computeAndRender(); });
+originEl.addEventListener('change', computeAndRender);
+destEl.addEventListener('change', computeAndRender);
+timeInput.addEventListener('change', computeAndRender);
+
+/* initial demo */
+computeAndRender();
+</script>
+</body>
+</html>

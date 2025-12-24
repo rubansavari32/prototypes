@@ -1,0 +1,306 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>GGI Shuttle — Updated Dashboard (Location Labels)</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#071223; --card:#071923; --muted:#9fb0c6; --accent:#10b98a; --white:#e9f2fb;
+}
+*{box-sizing:border-box;font-family:Inter,system-ui,Segoe UI,Roboto,Arial}
+body{margin:0;background:linear-gradient(180deg,#041122 0%, #061628 70%);color:var(--white);min-height:100vh;display:flex;align-items:flex-start;justify-content:center;padding:28px}
+.app{width:100%;max-width:1100px}
+.header{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.card{background:linear-gradient(180deg,var(--card), #07111a);border-radius:12px;padding:18px;box-shadow:0 12px 40px rgba(0,0,0,0.45)}
+.controls{display:grid;grid-template-columns:1fr 1fr 220px;gap:12px;align-items:end}
+label{display:block;font-size:13px;color:var(--muted);margin-bottom:6px}
+select,input[type="time"]{width:100%;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:rgba(255,255,255,0.02);color:var(--white)}
+button{background:var(--accent);border:none;color:#012018;padding:10px 12px;border-radius:8px;cursor:pointer;font-weight:700}
+.routeVis{display:flex;gap:12px;align-items:center;margin-top:16px}
+.stopBox{flex:1;padding:12px;border-radius:10px;background:rgba(255,255,255,0.02);text-align:center}
+.stopName{font-weight:700}
+.stopTime{margin-top:6px;color:var(--muted)}
+.connector{flex:2;position:relative;height:64px;display:flex;align-items:center;justify-content:center}
+.dashed{position:absolute;left:6%;right:6%;height:2px;border-bottom:2px dotted rgba(255,255,255,0.06);top:50%}
+.busDot{position:absolute;top:50%;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:6px}
+.busIcon{width:38px;height:38px;border-radius:10px;background:linear-gradient(180deg,var(--accent), #06a67a);display:flex;align-items:center;justify-content:center;color:#012018;font-weight:800}
+.etaSmall{font-size:13px;color:var(--muted)}
+.upList{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;margin-top:12px}
+.upItem{padding:10px;border-radius:8px;background:rgba(255,255,255,0.02);display:flex;justify-content:space-between;align-items:center;font-weight:700}
+.status{margin-top:12px;color:var(--muted);font-size:14px}
+.footer{margin-top:14px;color:var(--muted);font-size:13px;text-align:center}
+@media (max-width:900px){.controls{grid-template-columns:1fr 1fr 1fr}.routeVis{flex-direction:column}.connector{height:84px}}
+</style>
+</head>
+<body>
+  <div class="app">
+    <div class="header">
+      <div class="card" style="display:flex;gap:12px;align-items:center;padding:10px 14px">
+        <div style="font-weight:800;color:var(--accent)">🚌</div>
+        <div>
+          <div style="font-size:18px;font-weight:700">GGI Shuttle — Updated Dashboard</div>
+          <div style="font-size:12px;color:var(--muted)">Showing location names instead of route IDs</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="controls">
+        <div>
+          <label>Origin</label>
+          <select id="origin">
+            <option>Al Nahda</option>
+            <option selected>Mamzar</option>
+            <option>GGI - R15</option>
+          </select>
+        </div>
+
+        <div>
+          <label>Destination</label>
+          <select id="destination">
+            <option>Al Nahda</option>
+            <option>Mamzar</option>
+            <option selected>GGI - R15</option>
+          </select>
+        </div>
+
+        <div>
+          <label>Time (editable)</label>
+          <div style="display:flex;gap:8px">
+            <input id="timeInput" type="time" />
+            <button id="nowBtn">Now</button>
+          </div>
+          <div style="font-size:12px;color:var(--muted);margin-top:6px">Change time to test scenarios.</div>
+        </div>
+      </div>
+
+      <div style="margin-top:12px;display:flex;gap:10px;align-items:center">
+        <button id="findBtn">Find next bus</button>
+        <div class="status" id="status">Waiting for input</div>
+      </div>
+
+      <div class="routeVis" id="routeVis" style="margin-top:18px">
+        <div class="stopBox">
+          <div class="stopName" id="leftStop">--</div>
+          <div class="stopTime" id="leftTime">--:--</div>
+        </div>
+
+        <div class="connector">
+          <div class="dashed"></div>
+          <div class="busDot" id="busDot" style="left:6%">
+            <div class="busIcon">🚌</div>
+            <div class="etaSmall" id="eta">--</div>
+          </div>
+        </div>
+
+        <div class="stopBox">
+          <div class="stopName" id="rightStop">--</div>
+          <div class="stopTime" id="rightTime">--:--</div>
+        </div>
+      </div>
+
+      <div id="upcomingArea" style="margin-top:12px">
+        <div style="font-size:13px;color:var(--muted)">Upcoming (origin → destination)</div>
+        <div class="upList" id="upList"></div>
+      </div>
+
+      <div style="margin-top:12px" class="card">
+        <div style="font-weight:800" id="nextSummary">--</div>
+        <div style="color:var(--muted);margin-top:6px" id="nextDetails">--</div>
+      </div>
+
+      <div class="footer">Updated timetable used for all logic. '*' = no service for that leg.</div>
+    </div>
+  </div>
+
+<script>
+/* timetable (same as you provided) */
+const timetable = [
+  { id:"T1", stops:[ {name:"Al Nahda", time:"05:15"},{name:"Mamzar", time:"05:25"},{name:"GGI - R15", time:"05:40"},{name:"Mamzar", time:"*"},{name:"Al Nahda", time:"*"} ]},
+  { id:"T2", stops:[ {name:"Al Nahda", time:"06:10"},{name:"Mamzar", time:"06:20"},{name:"GGI - R15", time:"06:35"},{name:"Mamzar", time:"06:48"},{name:"Al Nahda", time:"06:53"} ]},
+  { id:"T3", stops:[ {name:"Al Nahda", time:"06:30"},{name:"Mamzar", time:"06:40"},{name:"GGI - R15", time:"06:55"},{name:"Mamzar", time:"07:10"},{name:"Al Nahda", time:"07:15"} ]},
+  { id:"T4", stops:[ {name:"Al Nahda", time:"06:55"},{name:"Mamzar", time:"07:05"},{name:"GGI - R15", time:"07:20"},{name:"Mamzar", time:"07:35"},{name:"Al Nahda", time:"07:45"} ]},
+  { id:"T5", stops:[ {name:"Al Nahda", time:"07:20"},{name:"Mamzar", time:"07:30"},{name:"GGI - R15", time:"07:45"},{name:"Mamzar", time:"08:00"},{name:"Al Nahda", time:"08:10"} ]},
+  { id:"T6", stops:[ {name:"Al Nahda", time:"07:50"},{name:"Mamzar", time:"08:00"},{name:"GGI - R15", time:"08:15"},{name:"Mamzar", time:"08:30"},{name:"Al Nahda", time:"08:40"} ]},
+  { id:"T7", stops:[ {name:"Al Nahda", time:"08:20"},{name:"Mamzar", time:"08:30"},{name:"GGI - R15", time:"08:45"},{name:"Mamzar", time:"09:00"},{name:"Al Nahda", time:"09:10"} ]},
+  { id:"T8", stops:[ {name:"Al Nahda", time:"09:00"},{name:"Mamzar", time:"09:10"},{name:"GGI - R15", time:"09:25"},{name:"Mamzar", time:"09:40"},{name:"Al Nahda", time:"09:50"} ]},
+  { id:"T9", stops:[ {name:"Al Nahda", time:"10:10"},{name:"Mamzar", time:"10:20"},{name:"GGI - R15", time:"10:35"},{name:"Mamzar", time:"10:50"},{name:"Al Nahda", time:"11:00"} ]},
+  { id:"T10", stops:[ {name:"Al Nahda", time:"11:10"},{name:"Mamzar", time:"11:20"},{name:"GGI - R15", time:"11:35"},{name:"Mamzar", time:"11:50"},{name:"Al Nahda", time:"12:00"} ]},
+  { id:"T11", stops:[ {name:"Al Nahda", time:"12:10"},{name:"Mamzar", time:"12:20"},{name:"GGI - R15", time:"12:35"},{name:"Mamzar", time:"12:50"},{name:"Al Nahda", time:"13:00"} ]},
+  { id:"T12", stops:[ {name:"Al Nahda", time:"12:50"},{name:"Mamzar", time:"13:00"},{name:"GGI - R15", time:"13:15"},{name:"Mamzar", time:"13:30"},{name:"Al Nahda", time:"13:35"} ]},
+  { id:"T13", stops:[ {name:"Al Nahda", time:"13:15"},{name:"Mamzar", time:"13:25"},{name:"GGI - R15", time:"13:40"},{name:"Mamzar", time:"13:55"},{name:"Al Nahda", time:"14:05"} ]},
+  { id:"T14", stops:[ {name:"Al Nahda", time:"13:40"},{name:"Mamzar", time:"13:50"},{name:"GGI - R15", time:"14:05"},{name:"Mamzar", time:"14:20"},{name:"Al Nahda", time:"14:30"} ]},
+  { id:"T15", stops:[ {name:"Al Nahda", time:"14:10"},{name:"Mamzar", time:"14:20"},{name:"GGI - R15", time:"14:35"},{name:"Mamzar", time:"14:48"},{name:"Al Nahda", time:"14:53"} ]},
+  { id:"T16", stops:[ {name:"Al Nahda", time:"14:30"},{name:"Mamzar", time:"14:40"},{name:"GGI - R15", time:"14:55"},{name:"Mamzar", time:"15:10"},{name:"Al Nahda", time:"15:20"} ]},
+  { id:"T17", stops:[ {name:"Al Nahda", time:"14:55"},{name:"Mamzar", time:"15:05"},{name:"GGI - R15", time:"15:20"},{name:"Mamzar", time:"15:35"},{name:"Al Nahda", time:"15:45"} ]},
+  { id:"T18", stops:[ {name:"Al Nahda", time:"15:35"},{name:"Mamzar", time:"15:45"},{name:"GGI - R15", time:"16:00"},{name:"Mamzar", time:"16:15"},{name:"Al Nahda", time:"16:20"} ]},
+  { id:"T19", stops:[ {name:"Al Nahda", time:"16:00"},{name:"Mamzar", time:"16:10"},{name:"GGI - R15", time:"16:25"},{name:"Mamzar", time:"16:38"},{name:"Al Nahda", time:"16:43"} ]},
+  { id:"T20", stops:[ {name:"Al Nahda", time:"16:40"},{name:"Mamzar", time:"16:50"},{name:"GGI - R15", time:"17:05"},{name:"Mamzar", time:"17:20"},{name:"Al Nahda", time:"17:30"} ]},
+  { id:"T21", stops:[ {name:"Al Nahda", time:"17:15"},{name:"Mamzar", time:"17:25"},{name:"GGI - R15", time:"17:40"},{name:"Mamzar", time:"17:55"},{name:"Al Nahda", time:"18:05"} ]},
+  { id:"T22", stops:[ {name:"Al Nahda", time:"17:50"},{name:"Mamzar", time:"18:00"},{name:"GGI - R15", time:"18:15"},{name:"Mamzar", time:"18:30"},{name:"Al Nahda", time:"18:40"} ]},
+  { id:"T23", stops:[ {name:"Al Nahda", time:"18:20"},{name:"Mamzar", time:"18:35"},{name:"GGI - R15", time:"18:50"},{name:"Mamzar", time:"19:05"},{name:"Al Nahda", time:"19:15"} ]},
+  { id:"T24", stops:[ {name:"Al Nahda", time:"18:50"},{name:"Mamzar", time:"19:00"},{name:"GGI - R15", time:"19:15"},{name:"Mamzar", time:"19:30"},{name:"Al Nahda", time:"19:40"} ]},
+  { id:"T25", stops:[ {name:"Al Nahda", time:"19:15"},{name:"Mamzar", time:"19:30"},{name:"GGI - R15", time:"19:45"},{name:"Mamzar", time:"20:05"},{name:"Al Nahda", time:"20:15"} ]},
+  { id:"T26", stops:[ {name:"Al Nahda", time:"19:45"},{name:"Mamzar", time:"20:00"},{name:"GGI - R15", time:"20:15"},{name:"Mamzar", time:"20:30"},{name:"Al Nahda", time:"20:40"} ]},
+  { id:"T27", stops:[ {name:"Al Nahda", time:"20:10"},{name:"Mamzar", time:"20:25"},{name:"GGI - R15", time:"20:40"},{name:"Mamzar", time:"20:55"},{name:"Al Nahda", time:"21:05"} ]},
+  { id:"T28", stops:[ {name:"Al Nahda", time:"20:45"},{name:"Mamzar", time:"21:00"},{name:"GGI - R15", time:"21:15"},{name:"Mamzar", time:"21:28"},{name:"Al Nahda", time:"21:33"} ]},
+  { id:"T29", stops:[ {name:"Al Nahda", time:"21:05"},{name:"Mamzar", time:"21:20"},{name:"GGI - R15", time:"21:35"},{name:"Mamzar", time:"21:50"},{name:"Al Nahda", time:"22:00"} ]},
+  { id:"T30", stops:[ {name:"Al Nahda", time:"21:15"},{name:"Mamzar", time:"21:30"},{name:"GGI - R15", time:"21:45"},{name:"Mamzar", time:"22:00"},{name:"Al Nahda", time:"22:10"} ]},
+  { id:"T31", stops:[ {name:"Al Nahda", time:"22:00"},{name:"Mamzar", time:"22:10"},{name:"GGI - R15", time:"22:25"},{name:"Mamzar", time:"22:38"},{name:"Al Nahda", time:"22:43"} ]},
+  { id:"T32", stops:[ {name:"Al Nahda", time:"22:20"},{name:"Mamzar", time:"22:30"},{name:"GGI - R15", time:"22:45"},{name:"Mamzar", time:"22:58"},{name:"Al Nahda", time:"23:03"} ]},
+  { id:"T33", stops:[ {name:"Al Nahda", time:"22:45"},{name:"Mamzar", time:"22:55"},{name:"GGI - R15", time:"23:10"},{name:"Mamzar", time:"23:23"},{name:"Al Nahda", time:"23:28"} ]},
+  { id:"T34", stops:[ {name:"Al Nahda", time:"23:05"},{name:"Mamzar", time:"23:15"},{name:"GGI - R15", time:"23:30"},{name:"Mamzar", time:"23:45"},{name:"Al Nahda", time:"23:50"} ]},
+  { id:"T35", stops:[ {name:"Al Nahda", time:"*"},{name:"Mamzar", time:"*"},{name:"GGI - R15", time:"00:10"},{name:"Mamzar", time:"00:25"},{name:"Al Nahda", time:"00:30"} ]},
+  { id:"T36", stops:[ {name:"Al Nahda", time:"*"},{name:"Mamzar", time:"*"},{name:"GGI - R15", time:"01:10"},{name:"Mamzar", time:"01:25"},{name:"Al Nahda", time:"01:30"} ]}
+];
+
+/* ----------------- UTILITIES ----------------- */
+const pad = n => String(n).padStart(2,'0');
+function toMinutes(t){ if(!t || t==='*') return null; const [h,m]=t.split(':').map(Number); return h*60 + m; }
+function minutesToStr(m){ m = ((m % (24*60)) + (24*60)) % (24*60); return pad(Math.floor(m/60))+':'+pad(m%60); }
+function nowMinutesFromInput(inputVal){
+  if(!inputVal) { const d=new Date(); return d.getHours()*60 + d.getMinutes(); }
+  const [hh,mm]=inputVal.split(':').map(Number); return hh*60 + mm;
+}
+
+/* Build candidate trips and include a human-friendly originName (first non-* stop) */
+function buildCandidates(origin, dest, nowMin){
+  const candidates = [];
+  for(const route of timetable){
+    const originIdx = route.stops.findIndex(s => s.name === origin && s.time !== '*');
+    const destIdx = route.stops.findIndex((s, i) => i>originIdx && s.name === dest && s.time !== '*');
+    if(originIdx === -1 || destIdx === -1) continue;
+    const departStr = route.stops[originIdx].time;
+    const arriveStr = route.stops[destIdx].time;
+    let departMin = toMinutes(departStr);
+    let arriveMin = toMinutes(arriveStr);
+    if(departMin === null || arriveMin === null) continue;
+
+    // human friendly origin name for UI (first non-* stop in this route)
+    const firstNonStar = route.stops.find(s => s.time !== '*');
+    const originName = firstNonStar ? firstNonStar.name : route.stops[0].name;
+
+    // If departMin <= nowMin, consider this trip on next day by adding 24*60
+    if(departMin <= nowMin) { departMin += 24*60; arriveMin += 24*60; }
+
+    candidates.push({
+      id: route.id,
+      originName,      // <-- human-friendly location label
+      departMin,
+      arriveMin,
+      departStr,
+      arriveStr
+    });
+  }
+  candidates.sort((a,b)=>a.departMin - b.departMin);
+  return candidates;
+}
+
+function findNextTrip(origin,dest, nowMin){
+  const cand = buildCandidates(origin,dest,nowMin);
+  return cand.length ? cand[0] : null;
+}
+function nextN(origin,dest, nowMin, n=8){ return buildCandidates(origin,dest,nowMin).slice(0,n); }
+
+/* ----------------- UI & RENDER ----------------- */
+const originEl = document.getElementById('origin');
+const destEl = document.getElementById('destination');
+const timeInput = document.getElementById('timeInput');
+const nowBtn = document.getElementById('nowBtn');
+const findBtn = document.getElementById('findBtn');
+const statusEl = document.getElementById('status');
+const leftStop = document.getElementById('leftStop');
+const leftTime = document.getElementById('leftTime');
+const rightStop = document.getElementById('rightStop');
+const rightTime = document.getElementById('rightTime');
+const busDot = document.getElementById('busDot');
+const etaEl = document.getElementById('eta');
+const upList = document.getElementById('upList');
+const nextSummary = document.getElementById('nextSummary');
+const nextDetails = document.getElementById('nextDetails');
+
+function setNowToInput(){ const d=new Date(); timeInput.value = pad(d.getHours())+':'+pad(d.getMinutes()); }
+setNowToInput();
+nowBtn.onclick = setNowToInput;
+
+function showStatus(txt){ statusEl.textContent = txt; }
+
+function compute(){
+  const origin = originEl.value;
+  const dest = destEl.value;
+  if(origin === dest){ showStatus("Origin and destination must differ."); return; }
+  const nowMin = nowMinutesFromInput(timeInput.value);
+  const next = findNextTrip(origin,dest,nowMin);
+  if(!next){
+    showStatus("No more buses (today).");
+    leftStop.textContent = origin; leftTime.textContent = "--:--";
+    rightStop.textContent = dest; rightTime.textContent = "--:--";
+    etaEl.textContent = "";
+    nextSummary.textContent = "No upcoming trips";
+    nextDetails.textContent = "";
+    upList.innerHTML = '<div style="color:var(--muted)">No upcoming</div>';
+    busDot.style.left = "6%";
+    return;
+  }
+
+  // use originName for UI label instead of technical id
+  const displayLabel = next.originName;
+
+  leftStop.textContent = origin; leftTime.textContent = minutesToStr(next.departMin);
+  rightStop.textContent = dest; rightTime.textContent = minutesToStr(next.arriveMin);
+  const minutesToDepart = Math.ceil(next.departMin - nowMin);
+  nextSummary.textContent = `${displayLabel} — Departs ${origin} at ${next.departStr} → Arrives ${dest} at ${next.arriveStr}`;
+  nextDetails.textContent = `Departs in ${minutesToDepart} min (local time).`;
+  showStatus(`Next: ${displayLabel} | dep ${next.departStr} → arr ${next.arriveStr}`);
+  renderBusPosition(nowMin, next.departMin, next.arriveMin);
+  renderUpcoming(origin,dest,nowMin);
+}
+
+/* position busDot between left (6%) and right (94%) */
+function renderBusPosition(nowMin, departMin, arriveMin){
+  let posPct = 6;
+  if(nowMin < departMin){
+    posPct = 6;
+    etaEl.textContent = `dep ${minutesToStr(departMin)}`;
+  } else if(nowMin >= arriveMin){
+    posPct = 94;
+    etaEl.textContent = `arr ${minutesToStr(arriveMin)}`;
+  } else {
+    const total = arriveMin - departMin;
+    const passed = nowMin - departMin;
+    const frac = Math.max(0, Math.min(1, passed/total));
+    posPct = 6 + (94-6) * frac;
+    const minsLeft = Math.ceil(arriveMin - nowMin);
+    etaEl.textContent = `${minsLeft}m to arr`;
+  }
+  busDot.style.left = posPct + '%';
+}
+
+/* Upcoming list shows originName (location) instead of route id */
+function renderUpcoming(origin,dest,nowMin){
+  const list = nextN(origin,dest,nowMin,8);
+  if(list.length === 0){ upList.innerHTML = '<div style="color:var(--muted)">No upcoming trips</div>'; return; }
+  upList.innerHTML = list.map(it => {
+    const dep = minutesToStr(it.departMin);
+    const arr = minutesToStr(it.arriveMin);
+    // show the human-friendly location name (originName) instead of Txx
+    return `<div class="upItem"><div>${it.originName}<div style="font-size:12px;color:var(--muted)">${dep}</div></div><div style="text-align:right">${arr}</div></div>`;
+  }).join('');
+}
+
+/* events */
+findBtn.onclick = compute;
+document.addEventListener('keydown', (e)=>{ if(e.key==='Enter') compute(); });
+
+/* auto-refresh */
+let refreshTimer = null;
+function startAutoRefresh(){ if(refreshTimer) clearInterval(refreshTimer); refreshTimer = setInterval(()=>{ compute(); }, 20*1000); }
+startAutoRefresh();
+
+/* initial compute */
+compute();
+</script>
+</body>
+</html>
