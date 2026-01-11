@@ -3,6 +3,10 @@ package com.example.wearosdashboard
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.hardware.Sensor
+import android.hardware.SensorEvent
+import android.hardware.SensorEventListener
+import android.hardware.SensorManager
 import android.os.BatteryManager
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -18,32 +22,53 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.wear.compose.material.*
 import com.example.wearosdashboard.data.PriceRepository
+import com.example.wearosdashboard.presentation.BusScheduleScreen
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.DirectionsBus
+import androidx.compose.material.icons.filled.Settings
 import com.example.wearosdashboard.presentation.theme.WearOSDashboardTheme
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
 
-// Enum for Navigation
-enum class Screen {
-    Dashboard, BusSchedule
-}
-
 class MainActivity : ComponentActivity() {
+
+    // Enum for Navigation
+    enum class Screen {
+        Dashboard,
+        BusSchedule,
+        Settings
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        
+        val initialDest = intent.getStringExtra("destination_name")
+        val startScreen = if (initialDest != null) Screen.BusSchedule else Screen.Dashboard
+
         setContent {
             WearOSDashboardTheme {
-                var currentScreen by remember { mutableStateOf(Screen.Dashboard) }
+                var currentScreen by remember { mutableStateOf(startScreen) }
 
-                when (currentScreen) {
-                    Screen.Dashboard -> DashboardScreen(
-                        context = this,
-                        onNavigateToBus = { currentScreen = Screen.BusSchedule }
-                    )
-                    Screen.BusSchedule -> com.example.wearosdashboard.presentation.BusScheduleScreen(
-                        onBack = { currentScreen = Screen.Dashboard }
-                    )
+                Scaffold(
+                    timeText = { TimeText() },
+                    vignette = { Vignette(vignettePosition = VignettePosition.TopAndBottom) }
+                ) {
+                    when (currentScreen) {
+                        Screen.Dashboard -> DashboardScreen(
+                            context = this@MainActivity,
+                            onNavigateToBus = { currentScreen = Screen.BusSchedule },
+                            onNavigateToSettings = { currentScreen = Screen.Settings }
+                        )
+                        Screen.BusSchedule -> BusScheduleScreen(
+                            onBack = { currentScreen = Screen.Dashboard },
+                            initialDestination = initialDest
+                        )
+                        Screen.Settings -> com.example.wearosdashboard.presentation.TileSettingsScreen(
+                            onBack = { currentScreen = Screen.Dashboard }
+                        )
+                    }
                 }
             }
         }
@@ -51,19 +76,23 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun DashboardScreen(context: Context, onNavigateToBus: () -> Unit) {
+fun DashboardScreen(
+    context: Context, 
+    onNavigateToBus: () -> Unit,
+    onNavigateToSettings: () -> Unit
+) {
     val coroutineScope = rememberCoroutineScope()
-    var weatherTemp by remember { mutableStateOf("Loading...") }
+    var weather by remember { mutableStateOf("Loading...") }
     var goldPrice by remember { mutableStateOf("Loading...") }
     var currentTime by remember { mutableStateOf("") }
     var currentDate by remember { mutableStateOf("") }
     var batteryLevel by remember { mutableIntStateOf(0) }
-    var steps by remember { mutableIntStateOf(0) }
+    var steps by remember { mutableStateOf("0") }
 
     // Fetch Prices & Weather
     LaunchedEffect(Unit) {
         while (true) {
-            weatherTemp = PriceRepository.getWeatherDubai()
+            weather = PriceRepository.getWeatherDubai()
             goldPrice = PriceRepository.get22kGoldAed()
             delay(60000) // Update every minute
         }
@@ -86,20 +115,22 @@ fun DashboardScreen(context: Context, onNavigateToBus: () -> Unit) {
 
     // Step Counter
     DisposableEffect(Unit) {
-        val sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as android.hardware.SensorManager
-        val stepSensor = sensorManager.getDefaultSensor(android.hardware.Sensor.TYPE_STEP_COUNTER)
+        val sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
+        val stepSensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER) // Use TYPE_STEP_COUNTER
         
-        val listener = object : android.hardware.SensorEventListener {
-            override fun onSensorChanged(event: android.hardware.SensorEvent?) {
+        val listener = object : SensorEventListener {
+            override fun onSensorChanged(event: SensorEvent?) {
                 event?.let {
-                    steps = it.values[0].toInt()
+                    if (it.values.isNotEmpty()) {
+                        steps = it.values[0].toInt().toString()
+                    }
                 }
             }
-            override fun onAccuracyChanged(sensor: android.hardware.Sensor?, accuracy: Int) {}
+            override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
         }
 
         stepSensor?.let {
-            sensorManager.registerListener(listener, it, android.hardware.SensorManager.SENSOR_DELAY_UI)
+            sensorManager.registerListener(listener, it, SensorManager.SENSOR_DELAY_UI)
         }
 
         onDispose {
@@ -112,28 +143,48 @@ fun DashboardScreen(context: Context, onNavigateToBus: () -> Unit) {
         vignette = { Vignette(vignettePosition = VignettePosition.TopAndBottom) }
     ) {
         ScalingLazyColumn(
-            modifier = Modifier.fillMaxSize().padding(horizontal = 8.dp),
-            verticalArrangement = Arrangement.Center,
+            modifier = Modifier.fillMaxSize(),
             anchorType = ScalingLazyListAnchorType.ItemCenter
         ) {
             item {
                 Text(
-                    text = "DASHBOARD",
-                    style = MaterialTheme.typography.caption1,
-                    color = MaterialTheme.colors.onSurfaceVariant
+                    text = "Dashboard",
+                    style = MaterialTheme.typography.title2,
+                    color = MaterialTheme.colors.primary
                 )
             }
-            
+            item { Spacer(modifier = Modifier.height(8.dp)) }
+
+            // Bus Schedule Chip
             item {
-                Spacer(modifier = Modifier.height(8.dp))
+                Chip(
+                    onClick = onNavigateToBus,
+                    label = { Text("Bus Schedule") },
+                    icon = { Icon(imageVector = Icons.Default.DirectionsBus, contentDescription = "Bus") },
+                    colors = ChipDefaults.primaryChipColors(backgroundColor = Color(0xFF00695C)), // Teal Dark
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp)
+                )
             }
+
+            // Settings Chip
+            item {
+                Chip(
+                    onClick = onNavigateToSettings,
+                    label = { Text("Tile Settings") },
+                    icon = { Icon(imageVector = Icons.Default.Settings, contentDescription = "Settings") },
+                    colors = ChipDefaults.secondaryChipColors(),
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp)
+                )
+            }
+
+            item { Spacer(modifier = Modifier.height(4.dp)) }
 
             // Gold Card
             item {
                 DashboardCard(
-                    title = "Gold 22k (1g) UAE",
+                    title = "22k Gold (UAE)",
                     value = goldPrice,
-                    color = Color(0xFFFFD700) // Gold Color
+                    color = Color(0xFFFFD700) 
                 )
             }
             
@@ -145,7 +196,7 @@ fun DashboardScreen(context: Context, onNavigateToBus: () -> Unit) {
             item {
                 DashboardCard(
                     title = "Dubai Weather",
-                    value = weatherTemp,
+                    value = weather,
                     color = Color(0xFF87CEEB) // Sky Blue
                 )
             }
@@ -157,26 +208,11 @@ fun DashboardScreen(context: Context, onNavigateToBus: () -> Unit) {
             item {
                 DashboardCard(
                     title = "Steps",
-                    value = "$steps",
+                    value = steps,
                     color = Color(0xFF98FB98) // Pale Green
                 )
             }
             
-            // Bus Schedule Button
-            item {
-                Spacer(modifier = Modifier.height(12.dp))
-            }
-            item {
-                 Chip(
-                    onClick = onNavigateToBus,
-                    label = { Text("Bus Schedule") },
-                    icon = { 
-                        // Simple icon if available or just text
-                    },
-                    colors = ChipDefaults.primaryChipColors(backgroundColor = Color(0xFF555555))
-                )
-            }
-
             // Info Row
             item {
                 Spacer(modifier = Modifier.height(8.dp))

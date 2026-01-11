@@ -1,11 +1,13 @@
 package com.example.wearosdashboard.presentation
 
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -14,16 +16,26 @@ import androidx.wear.compose.material.*
 import com.example.wearosdashboard.data.BusScheduleRepository
 
 @Composable
-fun BusScheduleScreen(onBack: () -> Unit) {
+fun BusScheduleScreen(onBack: () -> Unit, initialDestination: String? = null) {
     val destinations = remember { BusScheduleRepository.getDestinations() }
-    var selectedDestination by remember { mutableStateOf<String?>(null) }
+    var selectedDestination by remember { mutableStateOf(initialDestination) }
     
+    // Global Timer for the screen
+    var currentTime by remember { mutableStateOf(java.time.LocalTime.now()) }
+    
+    LaunchedEffect(Unit) {
+        while (true) {
+            currentTime = java.time.LocalTime.now()
+            kotlinx.coroutines.delay(1000)
+        }
+    }
+
     Scaffold(
         timeText = { TimeText() },
         vignette = { Vignette(vignettePosition = VignettePosition.TopAndBottom) }
     ) {
         if (selectedDestination == null) {
-            // List of Destinations
+            // Main List: Destination Tiles with Live Countdown
             ScalingLazyColumn(
                 modifier = Modifier.fillMaxSize(),
                 verticalArrangement = Arrangement.Center,
@@ -31,7 +43,7 @@ fun BusScheduleScreen(onBack: () -> Unit) {
             ) {
                 item {
                     Text(
-                        text = "Destinations",
+                        text = "Bus Schedule",
                         style = MaterialTheme.typography.title3,
                         color = MaterialTheme.colors.primary
                     )
@@ -40,18 +52,107 @@ fun BusScheduleScreen(onBack: () -> Unit) {
                 
                 items(destinations.size) { index ->
                     val dest = destinations[index]
-                    Chip(
-                        onClick = { selectedDestination = dest },
-                        label = { 
-                            Text(
-                                text = dest, 
-                                maxLines = 1,
-                                style = MaterialTheme.typography.caption2
-                            ) 
-                        },
-                        colors = ChipDefaults.secondaryChipColors(),
-                        modifier = Modifier.fillMaxWidth().padding(vertical = 2.dp)
+                    
+                    // Calculate Next Bus for this destination
+                    val departures = remember(dest) { BusScheduleRepository.getDeparturesForDestination(dest) }
+                    
+                    val nextDeparture = remember(currentTime, departures) {
+                        departures.firstOrNull { 
+                            try {
+                                val busTime = java.time.LocalTime.parse(it.time)
+                                busTime.isAfter(currentTime)
+                            } catch (e: Exception) { false }
+                        } ?: departures.firstOrNull()
+                    }
+                    
+                    val timeToNextBus = remember(currentTime, nextDeparture) {
+                        if (nextDeparture != null) {
+                            try {
+                                val busTime = java.time.LocalTime.parse(nextDeparture.time)
+                                var seconds = java.time.temporal.ChronoUnit.SECONDS.between(currentTime, busTime)
+                                if (seconds < 0) seconds += 86400 // Wrap around
+                                
+                                val h = seconds / 3600
+                                val m = (seconds % 3600) / 60
+                                val s = seconds % 60
+                                if (h > 0) String.format("%02d:%02d:%02d", h, m, s)
+                                else String.format("%02d:%02d", m, s)
+                            } catch (e: Exception) { "--" }
+                        } else { "--" }
+                    }
+
+                    // Color Logic
+                    val minutesLeft = remember(currentTime, nextDeparture) {
+                        if (nextDeparture != null) {
+                            try {
+                                val busTime = java.time.LocalTime.parse(nextDeparture.time)
+                                var diff = java.time.temporal.ChronoUnit.MINUTES.between(currentTime, busTime)
+                                if (diff < 0) diff += 1440
+                                diff
+                            } catch (e: Exception) { 999L }
+                        } else 999L
+                    }
+
+                    val timerColor = when {
+                        minutesLeft >= 30 -> Color.Green
+                        minutesLeft >= 20 -> Color(0xFFFFBF00) // Amber
+                        minutesLeft >= 10 -> Color(0xFFFF8C00) // Orange
+                        minutesLeft >= 5 -> Color.Red
+                        else -> Color.Red
+                    }
+                    
+                    val isPulsing = minutesLeft < 2
+
+                    // Pulsing Animation
+                    val infiniteTransition = rememberInfiniteTransition()
+                    val alpha by infiniteTransition.animateFloat(
+                        initialValue = 1f,
+                        targetValue = if (isPulsing) 0.3f else 1f,
+                        animationSpec = infiniteRepeatable(
+                            animation = tween(1000),
+                            repeatMode = RepeatMode.Reverse
+                        ),
+                        label = "pulsing"
                     )
+
+                    Card(
+                        onClick = { selectedDestination = dest },
+                        backgroundPainter = CardDefaults.cardBackgroundPainter(
+                            startBackgroundColor = Color(0xFF222222),
+                            endBackgroundColor = Color(0xFF222222)
+                        ),
+                        modifier = Modifier.fillMaxWidth().padding(vertical = 2.dp)
+                    ) {
+                        Column(modifier = Modifier.fillMaxWidth()) {
+                            Text(
+                                text = dest,
+                                style = MaterialTheme.typography.caption1,
+                                fontWeight = FontWeight.Bold,
+                                color = Color.White
+                            )
+                            if (nextDeparture != null) {
+                                Spacer(modifier = Modifier.height(4.dp))
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text(
+                                        text = "Next: ${nextDeparture.time}",
+                                        style = MaterialTheme.typography.caption3,
+                                        color = Color(0xFF80CBC4) // Light Teal
+                                    )
+                                    Text(
+                                        text = timeToNextBus,
+                                        style = MaterialTheme.typography.caption3,
+                                        color = timerColor,
+                                        fontWeight = FontWeight.Bold,
+                                        modifier = Modifier.alpha(if (isPulsing) alpha else 1f)
+                                    )
+                                }
+                            }
+                        }
+                    }
                 }
                 
                 item { Spacer(modifier = Modifier.height(8.dp)) }
@@ -65,51 +166,70 @@ fun BusScheduleScreen(onBack: () -> Unit) {
                 }
             }
         } else {
-            // List of Departures for Selected Destination
+            // Detail List for Selected Destination
             val departures = remember(selectedDestination) {
                 BusScheduleRepository.getDeparturesForDestination(selectedDestination!!)
             }
             
-            // "Next Bus" Logic
-            var currentTime by remember { mutableStateOf(java.time.LocalTime.now()) }
-            
-            LaunchedEffect(Unit) {
-                while (true) {
-                    currentTime = java.time.LocalTime.now()
-                    kotlinx.coroutines.delay(1000)
-                }
-            }
-
-            // Find next departure
+            // Find next departure (Detail View)
             val nextDeparture = remember(currentTime, departures) {
                 departures.firstOrNull { 
                     try {
                         val busTime = java.time.LocalTime.parse(it.time)
                         busTime.isAfter(currentTime)
                     } catch (e: Exception) { false }
-                } ?: departures.firstOrNull() // Wrap around to first bus of next day if none left today
+                } ?: departures.firstOrNull() 
             }
             
-            // Calculate time difference string
             val timeToNextBus = remember(currentTime, nextDeparture) {
                 if (nextDeparture != null) {
                     try {
                         val busTime = java.time.LocalTime.parse(nextDeparture.time)
                         var seconds = java.time.temporal.ChronoUnit.SECONDS.between(currentTime, busTime)
-                        if (seconds < 0) {
-                            // If bus is "tomorrow" (wrapped around), add 24 hours (86400 seconds)
-                            seconds += 86400
-                        }
+                        if (seconds < 0) seconds += 86400
                         
                         val h = seconds / 3600
                         val m = (seconds % 3600) / 60
                         val s = seconds % 60
-                        String.format("%02d:%02d:%02d", h, m, s)
+                        if (h > 0) String.format("%02d:%02d:%02d", h, m, s)
+                        else String.format("%02d:%02d", m, s)
                     } catch (e: Exception) { "--:--:--" }
-                } else {
-                    "--:--:--"
-                }
+                } else { "--:--:--" }
             }
+
+            // Color Logic for Detail View
+            val minutesLeft = remember(currentTime, nextDeparture) {
+                if (nextDeparture != null) {
+                    try {
+                        val busTime = java.time.LocalTime.parse(nextDeparture.time)
+                        var diff = java.time.temporal.ChronoUnit.MINUTES.between(currentTime, busTime)
+                        if (diff < 0) diff += 1440
+                        diff
+                    } catch (e: Exception) { 999L }
+                } else 999L
+            }
+
+            val timerColor = when {
+                minutesLeft >= 30 -> Color.Green
+                minutesLeft >= 20 -> Color(0xFFFFBF00) // Amber
+                minutesLeft >= 10 -> Color(0xFFFF8C00) // Orange
+                minutesLeft >= 5 -> Color.Red
+                else -> Color.Red
+            }
+            
+            val isPulsing = minutesLeft < 2
+
+            // Pulsing Animation
+            val infiniteTransition = rememberInfiniteTransition()
+            val alpha by infiniteTransition.animateFloat(
+                initialValue = 1f,
+                targetValue = if (isPulsing) 0.3f else 1f,
+                animationSpec = infiniteRepeatable(
+                    animation = tween(1000),
+                    repeatMode = RepeatMode.Reverse
+                ),
+                label = "pulsing_detail"
+            )
             
             ScalingLazyColumn(
                 modifier = Modifier.fillMaxSize(),
@@ -142,7 +262,7 @@ fun BusScheduleScreen(onBack: () -> Unit) {
                                     color = Color.Cyan
                                 )
                                 Text(
-                                    text = nextDeparture.time + ":00", // "Arrival timing with seconds" interpretation 1
+                                    text = nextDeparture.time + ":00", 
                                     style = MaterialTheme.typography.title3,
                                     fontWeight = FontWeight.Bold,
                                     color = Color.White
@@ -150,7 +270,8 @@ fun BusScheduleScreen(onBack: () -> Unit) {
                                 Text(
                                     text = "in $timeToNextBus",
                                     style = MaterialTheme.typography.body2,
-                                    color = Color.Yellow
+                                    color = timerColor,
+                                    modifier = Modifier.alpha(if (isPulsing) alpha else 1f)
                                 )
                             }
                         }
@@ -167,7 +288,6 @@ fun BusScheduleScreen(onBack: () -> Unit) {
                 
                 items(departures.size) { index ->
                     val dep = departures[index]
-                    // Highlight the next bus in the list as well
                     val isNext = dep == nextDeparture
                     
                     Card(

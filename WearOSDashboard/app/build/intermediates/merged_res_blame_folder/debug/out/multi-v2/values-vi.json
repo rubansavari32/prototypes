@@ -1,7 +1,7 @@
 {
     "logs": [
         {
-            "outputFile": "com.example.wearosdashboard.app-mergeDebugResources-51:/values-vi/values-vi.xml",
+            "outputFile": "com.example.wearosdashboard.app-mergeDebugResources-54:/values-vi/values-vi.xml",
             "map": [
                 {
                     "source": "C:\\Users\\devel\\.gradle\\caches\\9.0-milestone-1\\transforms\\c6f299117fd50724f7647c358c764023\\transformed\\ui-release\\res\\values-vi\\values-vi.xml",

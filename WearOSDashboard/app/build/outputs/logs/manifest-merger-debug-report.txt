@@ -1,9 +1,9 @@
 -- Merging decision tree log ---
 manifest
-ADDED from D:\Prototyping\GIT\prototypes\WearOSDashboard\app\src\main\AndroidManifest.xml:2:1-32:12
-INJECTED from D:\Prototyping\GIT\prototypes\WearOSDashboard\app\src\main\AndroidManifest.xml:2:1-32:12
-INJECTED from D:\Prototyping\GIT\prototypes\WearOSDashboard\app\src\main\AndroidManifest.xml:2:1-32:12
-INJECTED from D:\Prototyping\GIT\prototypes\WearOSDashboard\app\src\main\AndroidManifest.xml:2:1-32:12
+ADDED from D:\Prototyping\GIT\prototypes\WearOSDashboard\app\src\main\AndroidManifest.xml:2:1-45:12
+INJECTED from D:\Prototyping\GIT\prototypes\WearOSDashboard\app\src\main\AndroidManifest.xml:2:1-45:12
+INJECTED from D:\Prototyping\GIT\prototypes\WearOSDashboard\app\src\main\AndroidManifest.xml:2:1-45:12
+INJECTED from D:\Prototyping\GIT\prototypes\WearOSDashboard\app\src\main\AndroidManifest.xml:2:1-45:12
 MERGED from [com.google.android.gms:play-services-wearable:18.1.0] C:\Users\devel\.gradle\caches\9.0-milestone-1\transforms\af0686dc9870f3e89586fddb2bb1ce99\transformed\play-services-wearable-18.1.0\AndroidManifest.xml:17:1-24:12
 MERGED from [androidx.percentlayout:percentlayout:1.0.0] C:\Users\devel\.gradle\caches\9.0-milestone-1\transforms\29548abf0d4738829d92142a11d4a658\transformed\percentlayout-1.0.0\AndroidManifest.xml:17:1-22:12
 MERGED from [androidx.legacy:legacy-support-v4:1.0.0] C:\Users\devel\.gradle\caches\9.0-milestone-1\transforms\75dead49d8c19dd310f2b6ded0127147\transformed\legacy-support-v4-1.0.0\AndroidManifest.xml:17:1-22:12
@@ -14,6 +14,7 @@ MERGED from [androidx.wear.compose:compose-foundation:1.3.0] C:\Users\devel\.gra
 MERGED from [com.google.android.gms:play-services-base:18.0.1] C:\Users\devel\.gradle\caches\9.0-milestone-1\transforms\b970d65347e9fca97a323616575bf24e\transformed\play-services-base-18.0.1\AndroidManifest.xml:16:1-24:12
 MERGED from [androidx.compose.material:material-android:1.6.1] C:\Users\devel\.gradle\caches\9.0-milestone-1\transforms\b1a18fcfc78cf0c210ab6efd450b4b5a\transformed\material-release\AndroidManifest.xml:2:1-7:12
 MERGED from [androidx.compose.material:material-icons-core-android:1.6.1] C:\Users\devel\.gradle\caches\9.0-milestone-1\transforms\592a2237fcfd84a84d6cc830bcb53574\transformed\material-icons-core-release\AndroidManifest.xml:2:1-7:12
+MERGED from [androidx.compose.material:material-icons-extended-android:1.6.1] C:\Users\devel\.gradle\caches\9.0-milestone-1\transforms\9681e4adba49407c346c0c648d3db56b\transformed\material-icons-extended-release\AndroidManifest.xml:2:1-7:12
 MERGED from [androidx.compose.material:material-ripple-android:1.6.1] C:\Users\devel\.gradle\caches\9.0-milestone-1\transforms\17785751dbcbdf465d060f131727872e\transformed\material-ripple-release\AndroidManifest.xml:2:1-7:12
 MERGED from [androidx.compose.animation:animation-core-android:1.6.1] C:\Users\devel\.gradle\caches\9.0-milestone-1\transforms\cb8076718f7f2e1e5ab954f2bd6a60c8\transformed\animation-core-release\AndroidManifest.xml:2:1-7:12
 MERGED from [androidx.compose.animation:animation-android:1.6.1] C:\Users\devel\.gradle\caches\9.0-milestone-1\transforms\d4014463b185fa3be547154b7cdf3b39\transformed\animation-release\AndroidManifest.xml:2:1-7:12
@@ -63,6 +64,8 @@ MERGED from [androidx.autofill:autofill:1.0.0] C:\Users\devel\.gradle\caches\9.0
 MERGED from [androidx.core:core:1.12.0] C:\Users\devel\.gradle\caches\9.0-milestone-1\transforms\6922351435ea8f9c85ba8a86e1edafee\transformed\core-1.12.0\AndroidManifest.xml:17:1-30:12
 MERGED from [androidx.customview:customview-poolingcontainer:1.0.0] C:\Users\devel\.gradle\caches\9.0-milestone-1\transforms\3dc47745b69745ea8d5f1604a582b59e\transformed\customview-poolingcontainer-1.0.0\AndroidManifest.xml:17:1-23:12
 MERGED from [androidx.core:core-ktx:1.12.0] C:\Users\devel\.gradle\caches\9.0-milestone-1\transforms\0faee9b3c864d657bdea02a36768ebed\transformed\core-ktx-1.12.0\AndroidManifest.xml:2:1-7:12
+MERGED from [androidx.wear.tiles:tiles-material:1.1.0] C:\Users\devel\.gradle\caches\9.0-milestone-1\transforms\496c426e6a307ab89b2dff6ed1afc593\transformed\tiles-material-1.1.0\AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.wear.tiles:tiles:1.1.0] C:\Users\devel\.gradle\caches\9.0-milestone-1\transforms\fa2a25d1ab9eddcd182c7474de7a5461\transformed\tiles-1.1.0\AndroidManifest.xml:2:1-13:12
 MERGED from [androidx.annotation:annotation-experimental:1.3.0] C:\Users\devel\.gradle\caches\9.0-milestone-1\transforms\4df78f0b441b9bfb5055acdf3c28503b\transformed\annotation-experimental-1.3.0\AndroidManifest.xml:17:1-22:12
 MERGED from [androidx.versionedparcelable:versionedparcelable:1.1.1] C:\Users\devel\.gradle\caches\9.0-milestone-1\transforms\a51f13e2174c4f5e870f2f218161dbcd\transformed\versionedparcelable-1.1.1\AndroidManifest.xml:17:1-27:12
 MERGED from [androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\devel\.gradle\caches\9.0-milestone-1\transforms\b13aecd6127edff22b47716f6d3d0727\transformed\profileinstaller-1.3.0\AndroidManifest.xml:17:1-55:12
@@ -99,8 +102,8 @@ ADDED from D:\Prototyping\GIT\prototypes\WearOSDashboard\app\src\main\AndroidMan
 	android:name
 		ADDED from D:\Prototyping\GIT\prototypes\WearOSDashboard\app\src\main\AndroidManifest.xml:8:19-61
 application
-ADDED from D:\Prototyping\GIT\prototypes\WearOSDashboard\app\src\main\AndroidManifest.xml:10:5-30:19
-INJECTED from D:\Prototyping\GIT\prototypes\WearOSDashboard\app\src\main\AndroidManifest.xml:10:5-30:19
+ADDED from D:\Prototyping\GIT\prototypes\WearOSDashboard\app\src\main\AndroidManifest.xml:10:5-43:19
+INJECTED from D:\Prototyping\GIT\prototypes\WearOSDashboard\app\src\main\AndroidManifest.xml:10:5-43:19
 MERGED from [com.google.android.gms:play-services-wearable:18.1.0] C:\Users\devel\.gradle\caches\9.0-milestone-1\transforms\af0686dc9870f3e89586fddb2bb1ce99\transformed\play-services-wearable-18.1.0\AndroidManifest.xml:22:5-20
 MERGED from [com.google.android.gms:play-services-wearable:18.1.0] C:\Users\devel\.gradle\caches\9.0-milestone-1\transforms\af0686dc9870f3e89586fddb2bb1ce99\transformed\play-services-wearable-18.1.0\AndroidManifest.xml:22:5-20
 MERGED from [com.google.android.gms:play-services-base:18.0.1] C:\Users\devel\.gradle\caches\9.0-milestone-1\transforms\b970d65347e9fca97a323616575bf24e\transformed\play-services-base-18.0.1\AndroidManifest.xml:19:5-23:19
@@ -145,26 +148,52 @@ ADDED from D:\Prototyping\GIT\prototypes\WearOSDashboard\app\src\main\AndroidMan
 		ADDED from D:\Prototyping\GIT\prototypes\WearOSDashboard\app\src\main\AndroidManifest.xml:18:13-36
 	android:name
 		ADDED from D:\Prototyping\GIT\prototypes\WearOSDashboard\app\src\main\AndroidManifest.xml:17:13-55
-activity#com.example.wearosdashboard.MainActivity
-ADDED from D:\Prototyping\GIT\prototypes\WearOSDashboard\app\src\main\AndroidManifest.xml:20:9-29:20
+service#com.example.wearosdashboard.tile.BusScheduleTileService
+ADDED from D:\Prototyping\GIT\prototypes\WearOSDashboard\app\src\main\AndroidManifest.xml:20:9-31:19
 	android:label
-		ADDED from D:\Prototyping\GIT\prototypes\WearOSDashboard\app\src\main\AndroidManifest.xml:23:13-45
+		ADDED from D:\Prototyping\GIT\prototypes\WearOSDashboard\app\src\main\AndroidManifest.xml:22:13-41
 	android:exported
-		ADDED from D:\Prototyping\GIT\prototypes\WearOSDashboard\app\src\main\AndroidManifest.xml:22:13-36
+		ADDED from D:\Prototyping\GIT\prototypes\WearOSDashboard\app\src\main\AndroidManifest.xml:26:13-36
+	android:permission
+		ADDED from D:\Prototyping\GIT\prototypes\WearOSDashboard\app\src\main\AndroidManifest.xml:25:13-91
+	android:icon
+		ADDED from D:\Prototyping\GIT\prototypes\WearOSDashboard\app\src\main\AndroidManifest.xml:24:13-49
+	android:description
+		ADDED from D:\Prototyping\GIT\prototypes\WearOSDashboard\app\src\main\AndroidManifest.xml:23:13-51
+	android:name
+		ADDED from D:\Prototyping\GIT\prototypes\WearOSDashboard\app\src\main\AndroidManifest.xml:21:13-56
+intent-filter#action:name:androidx.wear.tiles.action.BIND_TILE_PROVIDER
+ADDED from D:\Prototyping\GIT\prototypes\WearOSDashboard\app\src\main\AndroidManifest.xml:27:13-29:29
+action#androidx.wear.tiles.action.BIND_TILE_PROVIDER
+ADDED from D:\Prototyping\GIT\prototypes\WearOSDashboard\app\src\main\AndroidManifest.xml:28:17-88
+	android:name
+		ADDED from D:\Prototyping\GIT\prototypes\WearOSDashboard\app\src\main\AndroidManifest.xml:28:25-85
+meta-data#androidx.wear.tiles.preview
+ADDED from D:\Prototyping\GIT\prototypes\WearOSDashboard\app\src\main\AndroidManifest.xml:30:13-110
+	android:resource
+		ADDED from D:\Prototyping\GIT\prototypes\WearOSDashboard\app\src\main\AndroidManifest.xml:30:67-107
+	android:name
+		ADDED from D:\Prototyping\GIT\prototypes\WearOSDashboard\app\src\main\AndroidManifest.xml:30:24-66
+activity#com.example.wearosdashboard.MainActivity
+ADDED from D:\Prototyping\GIT\prototypes\WearOSDashboard\app\src\main\AndroidManifest.xml:33:9-42:20
+	android:label
+		ADDED from D:\Prototyping\GIT\prototypes\WearOSDashboard\app\src\main\AndroidManifest.xml:36:13-45
+	android:exported
+		ADDED from D:\Prototyping\GIT\prototypes\WearOSDashboard\app\src\main\AndroidManifest.xml:35:13-36
 	android:theme
-		ADDED from D:\Prototyping\GIT\prototypes\WearOSDashboard\app\src\main\AndroidManifest.xml:24:13-63
+		ADDED from D:\Prototyping\GIT\prototypes\WearOSDashboard\app\src\main\AndroidManifest.xml:37:13-63
 	android:name
-		ADDED from D:\Prototyping\GIT\prototypes\WearOSDashboard\app\src\main\AndroidManifest.xml:21:13-41
+		ADDED from D:\Prototyping\GIT\prototypes\WearOSDashboard\app\src\main\AndroidManifest.xml:34:13-41
 intent-filter#action:name:android.intent.action.MAIN+category:name:android.intent.category.LAUNCHER
-ADDED from D:\Prototyping\GIT\prototypes\WearOSDashboard\app\src\main\AndroidManifest.xml:25:13-28:29
+ADDED from D:\Prototyping\GIT\prototypes\WearOSDashboard\app\src\main\AndroidManifest.xml:38:13-41:29
 action#android.intent.action.MAIN
-ADDED from D:\Prototyping\GIT\prototypes\WearOSDashboard\app\src\main\AndroidManifest.xml:26:17-69
+ADDED from D:\Prototyping\GIT\prototypes\WearOSDashboard\app\src\main\AndroidManifest.xml:39:17-69
 	android:name
-		ADDED from D:\Prototyping\GIT\prototypes\WearOSDashboard\app\src\main\AndroidManifest.xml:26:25-66
+		ADDED from D:\Prototyping\GIT\prototypes\WearOSDashboard\app\src\main\AndroidManifest.xml:39:25-66
 category#android.intent.category.LAUNCHER
-ADDED from D:\Prototyping\GIT\prototypes\WearOSDashboard\app\src\main\AndroidManifest.xml:27:17-77
+ADDED from D:\Prototyping\GIT\prototypes\WearOSDashboard\app\src\main\AndroidManifest.xml:40:17-77
 	android:name
-		ADDED from D:\Prototyping\GIT\prototypes\WearOSDashboard\app\src\main\AndroidManifest.xml:27:27-74
+		ADDED from D:\Prototyping\GIT\prototypes\WearOSDashboard\app\src\main\AndroidManifest.xml:40:27-74
 uses-sdk
 INJECTED from D:\Prototyping\GIT\prototypes\WearOSDashboard\app\src\main\AndroidManifest.xml reason: use-sdk injection requested
 INJECTED from D:\Prototyping\GIT\prototypes\WearOSDashboard\app\src\main\AndroidManifest.xml
@@ -189,6 +218,8 @@ MERGED from [androidx.compose.material:material-android:1.6.1] C:\Users\devel\.g
 MERGED from [androidx.compose.material:material-android:1.6.1] C:\Users\devel\.gradle\caches\9.0-milestone-1\transforms\b1a18fcfc78cf0c210ab6efd450b4b5a\transformed\material-release\AndroidManifest.xml:5:5-44
 MERGED from [androidx.compose.material:material-icons-core-android:1.6.1] C:\Users\devel\.gradle\caches\9.0-milestone-1\transforms\592a2237fcfd84a84d6cc830bcb53574\transformed\material-icons-core-release\AndroidManifest.xml:5:5-44
 MERGED from [androidx.compose.material:material-icons-core-android:1.6.1] C:\Users\devel\.gradle\caches\9.0-milestone-1\transforms\592a2237fcfd84a84d6cc830bcb53574\transformed\material-icons-core-release\AndroidManifest.xml:5:5-44
+MERGED from [androidx.compose.material:material-icons-extended-android:1.6.1] C:\Users\devel\.gradle\caches\9.0-milestone-1\transforms\9681e4adba49407c346c0c648d3db56b\transformed\material-icons-extended-release\AndroidManifest.xml:5:5-44
+MERGED from [androidx.compose.material:material-icons-extended-android:1.6.1] C:\Users\devel\.gradle\caches\9.0-milestone-1\transforms\9681e4adba49407c346c0c648d3db56b\transformed\material-icons-extended-release\AndroidManifest.xml:5:5-44
 MERGED from [androidx.compose.material:material-ripple-android:1.6.1] C:\Users\devel\.gradle\caches\9.0-milestone-1\transforms\17785751dbcbdf465d060f131727872e\transformed\material-ripple-release\AndroidManifest.xml:5:5-44
 MERGED from [androidx.compose.material:material-ripple-android:1.6.1] C:\Users\devel\.gradle\caches\9.0-milestone-1\transforms\17785751dbcbdf465d060f131727872e\transformed\material-ripple-release\AndroidManifest.xml:5:5-44
 MERGED from [androidx.compose.animation:animation-core-android:1.6.1] C:\Users\devel\.gradle\caches\9.0-milestone-1\transforms\cb8076718f7f2e1e5ab954f2bd6a60c8\transformed\animation-core-release\AndroidManifest.xml:5:5-44
@@ -287,6 +318,10 @@ MERGED from [androidx.customview:customview-poolingcontainer:1.0.0] C:\Users\dev
 MERGED from [androidx.customview:customview-poolingcontainer:1.0.0] C:\Users\devel\.gradle\caches\9.0-milestone-1\transforms\3dc47745b69745ea8d5f1604a582b59e\transformed\customview-poolingcontainer-1.0.0\AndroidManifest.xml:20:5-21:38
 MERGED from [androidx.core:core-ktx:1.12.0] C:\Users\devel\.gradle\caches\9.0-milestone-1\transforms\0faee9b3c864d657bdea02a36768ebed\transformed\core-ktx-1.12.0\AndroidManifest.xml:5:5-44
 MERGED from [androidx.core:core-ktx:1.12.0] C:\Users\devel\.gradle\caches\9.0-milestone-1\transforms\0faee9b3c864d657bdea02a36768ebed\transformed\core-ktx-1.12.0\AndroidManifest.xml:5:5-44
+MERGED from [androidx.wear.tiles:tiles-material:1.1.0] C:\Users\devel\.gradle\caches\9.0-milestone-1\transforms\496c426e6a307ab89b2dff6ed1afc593\transformed\tiles-material-1.1.0\AndroidManifest.xml:20:5-44
+MERGED from [androidx.wear.tiles:tiles-material:1.1.0] C:\Users\devel\.gradle\caches\9.0-milestone-1\transforms\496c426e6a307ab89b2dff6ed1afc593\transformed\tiles-material-1.1.0\AndroidManifest.xml:20:5-44
+MERGED from [androidx.wear.tiles:tiles:1.1.0] C:\Users\devel\.gradle\caches\9.0-milestone-1\transforms\fa2a25d1ab9eddcd182c7474de7a5461\transformed\tiles-1.1.0\AndroidManifest.xml:5:5-44
+MERGED from [androidx.wear.tiles:tiles:1.1.0] C:\Users\devel\.gradle\caches\9.0-milestone-1\transforms\fa2a25d1ab9eddcd182c7474de7a5461\transformed\tiles-1.1.0\AndroidManifest.xml:5:5-44
 MERGED from [androidx.annotation:annotation-experimental:1.3.0] C:\Users\devel\.gradle\caches\9.0-milestone-1\transforms\4df78f0b441b9bfb5055acdf3c28503b\transformed\annotation-experimental-1.3.0\AndroidManifest.xml:20:5-44
 MERGED from [androidx.annotation:annotation-experimental:1.3.0] C:\Users\devel\.gradle\caches\9.0-milestone-1\transforms\4df78f0b441b9bfb5055acdf3c28503b\transformed\annotation-experimental-1.3.0\AndroidManifest.xml:20:5-44
 MERGED from [androidx.versionedparcelable:versionedparcelable:1.1.1] C:\Users\devel\.gradle\caches\9.0-milestone-1\transforms\a51f13e2174c4f5e870f2f218161dbcd\transformed\versionedparcelable-1.1.1\AndroidManifest.xml:20:5-22:41
@@ -387,6 +422,14 @@ uses-permission#com.example.wearosdashboard.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMIS
 ADDED from [androidx.core:core:1.12.0] C:\Users\devel\.gradle\caches\9.0-milestone-1\transforms\6922351435ea8f9c85ba8a86e1edafee\transformed\core-1.12.0\AndroidManifest.xml:26:5-97
 	android:name
 		ADDED from [androidx.core:core:1.12.0] C:\Users\devel\.gradle\caches\9.0-milestone-1\transforms\6922351435ea8f9c85ba8a86e1edafee\transformed\core-1.12.0\AndroidManifest.xml:26:22-94
+queries
+ADDED from [androidx.wear.tiles:tiles:1.1.0] C:\Users\devel\.gradle\caches\9.0-milestone-1\transforms\fa2a25d1ab9eddcd182c7474de7a5461\transformed\tiles-1.1.0\AndroidManifest.xml:7:5-11:15
+intent#action:name:androidx.wear.tiles.action.BIND_UPDATE_REQUESTER
+ADDED from [androidx.wear.tiles:tiles:1.1.0] C:\Users\devel\.gradle\caches\9.0-milestone-1\transforms\fa2a25d1ab9eddcd182c7474de7a5461\transformed\tiles-1.1.0\AndroidManifest.xml:8:9-10:18
+action#androidx.wear.tiles.action.BIND_UPDATE_REQUESTER
+ADDED from [androidx.wear.tiles:tiles:1.1.0] C:\Users\devel\.gradle\caches\9.0-milestone-1\transforms\fa2a25d1ab9eddcd182c7474de7a5461\transformed\tiles-1.1.0\AndroidManifest.xml:9:13-87
+	android:name
+		ADDED from [androidx.wear.tiles:tiles:1.1.0] C:\Users\devel\.gradle\caches\9.0-milestone-1\transforms\fa2a25d1ab9eddcd182c7474de7a5461\transformed\tiles-1.1.0\AndroidManifest.xml:9:21-84
 meta-data#androidx.profileinstaller.ProfileInstallerInitializer
 ADDED from [androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\devel\.gradle\caches\9.0-milestone-1\transforms\b13aecd6127edff22b47716f6d3d0727\transformed\profileinstaller-1.3.0\AndroidManifest.xml:29:13-31:52
 	android:value

@@ -105,6 +105,7 @@ dimen subtitle_corner_radius
 dimen subtitle_outline_width
 dimen subtitle_shadow_offset
 dimen subtitle_shadow_radius
+drawable avatar
 drawable circular_vignette_bottom
 drawable circular_vignette_top
 drawable common_full_open_on_phone
@@ -150,6 +151,7 @@ drawable notification_tile_bg
 drawable notify_panel_notification_icon_bg
 drawable rectangular_vignette_bottom
 drawable rectangular_vignette_top
+drawable tile_icon
 id accessibility_action_clickable_span
 id accessibility_custom_action_0
 id accessibility_custom_action_1

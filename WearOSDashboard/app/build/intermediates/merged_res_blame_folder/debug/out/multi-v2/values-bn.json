@@ -1,7 +1,7 @@
 {
     "logs": [
         {
-            "outputFile": "com.example.wearosdashboard.app-mergeDebugResources-51:/values-bn/values-bn.xml",
+            "outputFile": "com.example.wearosdashboard.app-mergeDebugResources-54:/values-bn/values-bn.xml",
             "map": [
                 {
                     "source": "C:\\Users\\devel\\.gradle\\caches\\9.0-milestone-1\\transforms\\6401b5caddf50b9e921379caa3179fde\\transformed\\play-services-basement-18.0.0\\res\\values-bn\\values.xml",
